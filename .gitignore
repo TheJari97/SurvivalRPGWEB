@@ -1,0 +1,19 @@
+# Dependencies and local build output.
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.output/
+
+# Local environment files.
+.env
+.env.*
+!.env.example
+
+# Logs and editor files.
+*.log
+.vscode/
+.vs/
+Thumbs.db
+Desktop.ini
