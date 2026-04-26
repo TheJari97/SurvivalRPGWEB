@@ -45,6 +45,17 @@ const required = [
   "INITIAL_ADMIN_FORCE_PASSWORD_CHANGE",
 ];
 
+const optional = [
+  "DATABASE_POOLER_URL",
+  "VERCEL_TOKEN",
+  "VERCEL_PROJECT_ID",
+  "VERCEL_TEAM_ID",
+  "VERCEL_ORG_ID",
+  "CLOUDFLARE_ACCOUNT_ID",
+  "CLOUDFLARE_ZONE_ID",
+  "CLOUDFLARE_API_TOKEN",
+];
+
 let failed = false;
 for (const key of required) {
   const value = env[key] ?? "";
@@ -55,6 +66,16 @@ for (const key of required) {
       : "SET";
   console.log(`${key}=${status}`);
   if (status !== "SET") failed = true;
+}
+
+for (const key of optional) {
+  const value = env[key] ?? "";
+  const status = !value
+    ? "EMPTY"
+    : /PON_AQUI|replace_me|ROTAR/i.test(value)
+      ? "PLACEHOLDER"
+      : "SET";
+  console.log(`${key}=${status}`);
 }
 
 if (env.SUPABASE_DB_PASSWORD_RAW && env.SUPABASE_DB_PASSWORD_URL_ENCODED) {

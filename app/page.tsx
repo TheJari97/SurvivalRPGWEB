@@ -10,7 +10,7 @@ export default async function HomePage() {
       <section className="hero">
         <div>
           <p className="eyebrow">Custom game RPG cooperativo para Dota 2</p>
-          <h1>SurvivalRPG Dota</h1>
+          <h1>SurvivalRPG</h1>
           <p className="lead">
             Progreso por SteamID, heroes con avance propio, mundos con limite de nivel, crafteo por rol,
             mascotas, temporadas, rankings publicos y administracion centralizada para balancear el juego.

@@ -1,4 +1,12 @@
-export default function AdminLoginPage() {
+import { redirect } from "next/navigation";
+import { getAdminSession } from "../../lib/admin-auth";
+import { AdminLoginForm } from "./AdminLoginForm";
+
+export default async function AdminLoginPage() {
+  const session = await getAdminSession();
+  if (session?.mustChangePassword) redirect("/admin/change-password");
+  if (session) redirect("/admin");
+
   return (
     <main className="page">
       <section className="section">
@@ -11,15 +19,7 @@ export default function AdminLoginPage() {
       </section>
 
       <section className="section">
-        <form className="card" style={{ maxWidth: 520 }}>
-          <h3>Login admin</h3>
-          <p>Autenticacion pendiente de activar cuando la base de datos este aplicada.</p>
-          <div className="tag-row">
-            <span className="tag">Usuario + password</span>
-            <span className="tag">SteamID admin</span>
-            <span className="tag">Cambio obligatorio</span>
-          </div>
-        </form>
+        <AdminLoginForm />
       </section>
     </main>
   );

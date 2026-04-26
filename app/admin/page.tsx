@@ -1,6 +1,12 @@
+import { redirect } from "next/navigation";
 import { adminSections } from "../lib/mock-data";
+import { getAdminSession } from "../lib/admin-auth";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await getAdminSession();
+  if (!session) redirect("/admin/login");
+  if (session.mustChangePassword) redirect("/admin/change-password");
+
   return (
     <main className="page">
       <section className="section">
@@ -10,6 +16,12 @@ export default function AdminPage() {
           Estructura base para administrar jugadores, progreso, balance, enemigos, items, misiones,
           pagos, sanciones y auditoria. Los cambios de balance quedaran como borrador hasta publicar.
         </p>
+        <div className="admin-topline">
+          <span>Sesion: {session.username}</span>
+          <form action="/api/admin/logout" method="post">
+            <button className="button secondary" type="submit">Salir</button>
+          </form>
+        </div>
       </section>
 
       <section className="section admin-layout">
