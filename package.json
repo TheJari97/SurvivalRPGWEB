@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:env": "node scripts/check-env.mjs",
+    "check:db": "node scripts/check-database-url.mjs",
+    "check:vercel-env": "node scripts/check-vercel-env.mjs",
+    "check:vercel-deployments": "node scripts/check-vercel-deployments.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",

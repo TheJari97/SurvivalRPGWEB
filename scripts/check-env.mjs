@@ -1,26 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseEnv, valueStatus } from "./env-utils.mjs";
 
 const root = process.cwd();
 const envPath = path.join(root, ".env.local");
-
-function parseEnv(filePath) {
-  const env = {};
-  if (!fs.existsSync(filePath)) return env;
-
-  for (const rawLine of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#") || !line.includes("=")) continue;
-    const index = line.indexOf("=");
-    const key = line.slice(0, index).trim();
-    let value = line.slice(index + 1).trim();
-    if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"'))) {
-      value = value.slice(1, -1);
-    }
-    env[key] = value;
-  }
-  return env;
-}
 
 const env = parseEnv(envPath);
 const required = [
@@ -59,22 +42,14 @@ const optional = [
 let failed = false;
 for (const key of required) {
   const value = env[key] ?? "";
-  const status = !value
-    ? "EMPTY"
-    : /PON_AQUI|replace_me|ROTAR/i.test(value)
-      ? "PLACEHOLDER"
-      : "SET";
+  const status = valueStatus(value);
   console.log(`${key}=${status}`);
   if (status !== "SET") failed = true;
 }
 
 for (const key of optional) {
   const value = env[key] ?? "";
-  const status = !value
-    ? "EMPTY"
-    : /PON_AQUI|replace_me|ROTAR/i.test(value)
-      ? "PLACEHOLDER"
-      : "SET";
+  const status = valueStatus(value);
   console.log(`${key}=${status}`);
 }
 
