@@ -9,8 +9,10 @@
     "lint": "next lint",
     "check:env": "node scripts/check-env.mjs",
     "check:db": "node scripts/check-database-url.mjs",
+    "check:supabase": "node scripts/check-supabase-schema.mjs",
     "check:vercel-env": "node scripts/check-vercel-env.mjs",
-    "check:vercel-deployments": "node scripts/check-vercel-deployments.mjs"
+    "check:vercel-deployments": "node scripts/check-vercel-deployments.mjs",
+    "vercel:update-db": "node scripts/update-vercel-database-url.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
