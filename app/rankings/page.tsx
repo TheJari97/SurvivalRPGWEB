@@ -9,8 +9,8 @@ export default async function RankingsPage() {
         <p className="eyebrow">Publico</p>
         <h1>Rankings</h1>
         <p className="lead">
-          Esta vista sera publica. Cuando conectemos Supabase, leera temporadas, heroes, nivel,
-          mundo, zona y gear score desde la base de datos.
+          Ranking publico alimentado por guardados reales del modo. Hasta que entren partidas con
+          guardado valido, la tabla permanecera vacia.
         </p>
       </section>
 
@@ -28,7 +28,7 @@ export default async function RankingsPage() {
               </tr>
             </thead>
             <tbody>
-              {rankings.map((row) => (
+              {rankings.length > 0 ? rankings.map((row) => (
                 <tr key={row.rank}>
                   <td>{row.rank}</td>
                   <td>{row.player}</td>
@@ -37,7 +37,11 @@ export default async function RankingsPage() {
                   <td>{row.world}</td>
                   <td>{row.gear}</td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6}>Sin guardados reales todavia.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

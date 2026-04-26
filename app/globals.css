@@ -210,6 +210,11 @@ h1 {
   border-right: 0;
 }
 
+.dashboard-stats {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 22, 27, 0.86);
+}
+
 .stat strong {
   display: block;
   font-size: 28px;
@@ -296,6 +301,10 @@ th {
 
 td {
   color: var(--muted);
+}
+
+td[colspan] {
+  text-align: center;
 }
 
 .admin-layout {

@@ -14,6 +14,8 @@ const checks = [
   ["admin_accounts", "username,active,must_change_password"],
   ["admin_role_permissions", "role,permission"],
   ["public_rankings", "display_name,hero_name,level,world_level,gear_score"],
+  ["game_save_events", "steam_id,hero_name,status"],
+  ["admin_dashboard_summary", "players_count,heroes_count,accepted_saves_count"],
 ];
 
 let failed = false;

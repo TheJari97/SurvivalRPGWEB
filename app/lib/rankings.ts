@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { appConfig } from "./config";
-import { rankings as fallbackRankings } from "./mock-data";
 
 export type RankingRow = {
   rank: number;
@@ -21,7 +20,7 @@ type PublicRankingRow = {
 
 export async function getPublicRankings(): Promise<RankingRow[]> {
   if (!appConfig.supabaseUrl || !appConfig.supabasePublishableKey) {
-    return fallbackRankings;
+    return [];
   }
 
   try {
@@ -31,7 +30,7 @@ export async function getPublicRankings(): Promise<RankingRow[]> {
       .select("display_name, hero_name, level, world_level, gear_score")
       .limit(25);
 
-    if (error || !data || data.length === 0) return fallbackRankings;
+    if (error || !data || data.length === 0) return [];
 
     return (data as PublicRankingRow[]).map((row, index) => ({
       rank: index + 1,
@@ -42,6 +41,6 @@ export async function getPublicRankings(): Promise<RankingRow[]> {
       gear: row.gear_score ?? 0,
     }));
   } catch {
-    return fallbackRankings;
+    return [];
   }
 }

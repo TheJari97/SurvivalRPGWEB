@@ -342,7 +342,13 @@ on conflict (steam_id, role) do nothing;
 
 insert into public.admin_accounts(steam_id, username, must_change_password, active)
 values ('76561198988350556', 'JariAdmin', true, true)
-on conflict (username) do update set steam_id = excluded.steam_id, must_change_password = true, active = true;
+on conflict (username) do update set
+  steam_id = excluded.steam_id,
+  must_change_password = case
+    when public.admin_accounts.password_hash is null then true
+    else public.admin_accounts.must_change_password
+  end,
+  active = true;
 
 insert into public.admin_role_permissions(role, permission)
 values

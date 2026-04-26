@@ -38,10 +38,19 @@ if (-not $psql) {
   throw "psql.exe was not found. Install PostgreSQL client tools or adjust this script."
 }
 
-$migration = Join-Path $root "supabase\migrations\20260426153500_initial_schema.sql"
-if (-not (Test-Path -LiteralPath $migration)) {
-  throw "Migration file not found: $migration"
+$migrationDir = Join-Path $root "supabase\migrations"
+if (-not (Test-Path -LiteralPath $migrationDir)) {
+  throw "Migration directory not found: $migrationDir"
 }
 
-& $psql $url -v ON_ERROR_STOP=1 -q -f $migration
-Write-Output "MIGRATION_APPLIED=YES"
+$migrations = Get-ChildItem -LiteralPath $migrationDir -Filter "*.sql" | Sort-Object Name
+if (-not $migrations) {
+  throw "No migration files found in $migrationDir"
+}
+
+foreach ($migration in $migrations) {
+  Write-Output "APPLYING_MIGRATION=$($migration.Name)"
+  & $psql $url -v ON_ERROR_STOP=1 -q -f $migration.FullName
+}
+
+Write-Output "MIGRATIONS_APPLIED=$($migrations.Count)"
