@@ -14,9 +14,18 @@ create table if not exists public.admin_accounts (
   steam_id text references public.players(steam_id) on delete cascade,
   username text unique not null,
   password_hash text,
+  must_change_password boolean not null default true,
+  password_changed_at timestamptz,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_role_permissions (
+  role text not null,
+  permission text not null,
+  created_at timestamptz not null default now(),
+  primary key (role, permission)
 );
 
 create table if not exists public.player_roles (
@@ -243,6 +252,49 @@ from public.balance_configs
 where status = 'published'
 order by config_key, scope, version desc;
 
+create or replace function public.publish_balance_config(
+  p_config_key text,
+  p_scope text,
+  p_actor_steam_id text
+)
+returns uuid
+language plpgsql
+security definer
+as $$
+declare
+  v_id uuid;
+begin
+  select id into v_id
+  from public.balance_configs
+  where config_key = p_config_key
+    and scope = p_scope
+    and status = 'draft'
+  order by version desc, created_at desc
+  limit 1;
+
+  if v_id is null then
+    raise exception 'No draft balance config found for %.%', p_config_key, p_scope;
+  end if;
+
+  update public.balance_configs
+  set status = 'archived'
+  where config_key = p_config_key
+    and scope = p_scope
+    and status = 'published';
+
+  update public.balance_configs
+  set status = 'published',
+      published_at = now(),
+      created_by = coalesce(created_by, p_actor_steam_id)
+  where id = v_id;
+
+  insert into public.audit_logs(actor_steam_id, actor_role, action, target_type, target_id, after_value)
+  values (p_actor_steam_id, 'admin', 'publish_balance_config', 'balance_configs', v_id::text, jsonb_build_object('config_key', p_config_key, 'scope', p_scope));
+
+  return v_id;
+end;
+$$;
+
 alter table public.players enable row level security;
 alter table public.admin_accounts enable row level security;
 alter table public.player_roles enable row level security;
@@ -287,3 +339,29 @@ on conflict (steam_id) do update set display_name = excluded.display_name;
 insert into public.player_roles(steam_id, role)
 values ('76561198988350556', 'owner'), ('76561198988350556', 'admin')
 on conflict (steam_id, role) do nothing;
+
+insert into public.admin_accounts(steam_id, username, must_change_password, active)
+values ('76561198988350556', 'JariAdmin', true, true)
+on conflict (username) do update set steam_id = excluded.steam_id, must_change_password = true, active = true;
+
+insert into public.admin_role_permissions(role, permission)
+values
+  ('owner', 'admin.full_access'),
+  ('admin', 'players.read'),
+  ('admin', 'players.sanction'),
+  ('admin', 'progress.read'),
+  ('admin', 'progress.edit'),
+  ('admin', 'balance.read'),
+  ('admin', 'balance.draft'),
+  ('admin', 'balance.publish'),
+  ('admin', 'items.read'),
+  ('admin', 'items.edit'),
+  ('admin', 'monsters.read'),
+  ('admin', 'monsters.edit'),
+  ('admin', 'payments.read'),
+  ('admin', 'audit.read'),
+  ('moderator', 'players.read'),
+  ('moderator', 'players.sanction'),
+  ('support', 'players.read'),
+  ('support', 'payments.read')
+on conflict (role, permission) do nothing;

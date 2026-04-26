@@ -12,7 +12,6 @@ const navItems = [
   { href: "/rankings", label: "Rankings" },
   { href: "/catalog", label: "Catalogo" },
   { href: "/profile", label: "Perfil" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
