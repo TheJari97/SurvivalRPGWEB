@@ -61,6 +61,7 @@ export default async function ProfilePage({
 
       <nav className="subnav" aria-label="Subsecciones de perfil">
         <a href="#resumen">Resumen</a>
+        <a href="#insignias">Insignias</a>
         <a href="#personajes">Personajes</a>
         <a href="#cuenta">Cuenta</a>
       </nav>
@@ -83,6 +84,41 @@ export default async function ProfilePage({
             <strong>{profile.cosmeticsCount}</strong>
             <span>Cosmeticos</span>
           </div>
+          <div className="stat">
+            <strong>{profile.badges.length}</strong>
+            <span>Insignias</span>
+          </div>
+          <div className="stat">
+            <strong>{profile.achievements.filter((achievement) => achievement.completed).length}</strong>
+            <span>Logros</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="insignias">
+        <div className="catalog-toolbar-line">
+          <h2>Insignias y logros</h2>
+          <span className="count-badge">{profile.badges.length + profile.achievements.length} registros</span>
+        </div>
+        <div className="badge-grid">
+          {profile.badges.length > 0 ? profile.badges.map((badge) => (
+            <article className="badge-card" key={`${badge.badge_key}:${badge.season_id ?? "global"}`}>
+              {badge.badge_definitions?.image_url ? <img className="mini-avatar" src={badge.badge_definitions.image_url} alt="" /> : <span className="mini-avatar fallback">IN</span>}
+              <div>
+                <strong>{badge.badge_definitions?.name_es ?? badge.badge_key}</strong>
+                <span>{badge.badge_definitions?.summary_es ?? "Insignia de cuenta"}</span>
+              </div>
+            </article>
+          )) : <article className="card empty-state-card"><p>Sin insignias aun.</p></article>}
+        </div>
+        <div className="achievement-grid">
+          {profile.achievements.length > 0 ? profile.achievements.map((achievement) => (
+            <article className="achievement-card" key={`${achievement.achievement_key}:${achievement.season_id ?? "global"}`}>
+              <strong>{achievement.achievement_definitions?.name_es ?? achievement.achievement_key}</strong>
+              <span>{achievement.completed ? "Completado" : `Progreso ${achievement.progress}`}</span>
+              <p>{achievement.achievement_definitions?.summary_es ?? "Logro de cuenta"}</p>
+            </article>
+          )) : null}
         </div>
       </section>
 

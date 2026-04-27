@@ -31,6 +31,10 @@ const typeLabels: Record<string, string> = {
   ability: "Habilidades",
   resource: "Recursos",
   craft: "Crafteos",
+  artifact: "Artefactos",
+  badge: "Insignias",
+  achievement: "Logros",
+  season: "Temporadas",
 };
 
 const catalogTabs = [
@@ -39,6 +43,11 @@ const catalogTabs = [
   { key: "resource", label: "Recursos" },
   { key: "recipe", label: "Recetas" },
   { key: "hero", label: "Heroes" },
+  { key: "pet", label: "Mascotas" },
+  { key: "artifact", label: "Artefactos" },
+  { key: "zone", label: "Zonas" },
+  { key: "badge", label: "Insignias" },
+  { key: "achievement", label: "Logros" },
 ];
 
 const attributes = ["all", "fuerza", "agilidad", "inteligencia", "neutral"];
@@ -55,15 +64,22 @@ const rarityLabels: Record<string, string> = {
   resource: "Recurso",
 };
 
-const rarityDescriptions: Record<string, string> = {
-  basic: "Entrada de progreso. Sirve para empezar, vender o alimentar mejoras sencillas.",
-  common: "Base estable de Mundo 1. Buen punto para craftear y preparar upgrades.",
-  rare: "Pieza azul de avance. Normalmente requiere mejores materiales o elites.",
-  epic: "Pieza morada. Pensada para ramas de crafteo y retos de zona.",
-  legendary: "Pieza dorada. Objetivo de largo plazo y jefes avanzados.",
-  mythic: "Pieza roja. Reservada para mundos altos, eventos o temporada.",
-  ancient: "Pieza especial. Puede venir de condiciones raras o logros.",
-  resource: "Material. Se usa para recetas, upgrades o mitigacion de fallo.",
+const categoryLabels: Record<string, string> = {
+  teleport: "Zonas por teleport",
+  teleport_zone: "Zonas por teleport",
+  pet: "Mascotas",
+  hero_artifact: "Artefactos de heroe",
+  pet_artifact: "Artefactos de mascota",
+  staff: "Staff",
+  season: "Temporada",
+  support: "Apoyo",
+  ranking: "Ranking",
+  combat: "Combate",
+  progress: "Progreso",
+  crafting: "Crafteo",
+  zone: "Zona",
+  artifact: "Artefacto",
+  account: "Cuenta",
 };
 
 const statMeta: Record<string, { label: string; kind: string; unit?: string; detail: string }> = {
@@ -193,7 +209,7 @@ export function CatalogBrowser({ content, changes, initialType }: CatalogBrowser
           <label className="field compact-field">
             <span>Atributo</span>
             <select className="input" value={selectedAttribute} onChange={(event) => setSelectedAttribute(event.target.value)}>
-              {attributes.map((attr) => <option value={attr} key={attr}>{attr === "all" ? "Todos" : attr}</option>)}
+              {attributes.map((attr) => <option value={attr} key={attr}>{attr === "all" ? "Todos" : getAttributeLabel(attr)}</option>)}
             </select>
           </label>
           <label className="field compact-field">
@@ -224,7 +240,7 @@ export function CatalogBrowser({ content, changes, initialType }: CatalogBrowser
             <summary className="catalog-group-head">
               <span>
                 <strong>{group.label}</strong>
-                <small>{group.description}</small>
+                {group.description ? <small>{group.description}</small> : null}
               </span>
               <span className="tag">{group.entries.length}</span>
             </summary>
@@ -334,7 +350,8 @@ function CatalogModal({
   onClose: () => void;
 }) {
   const image = getCatalogImage(entry);
-  const statsByTier = asRecord(entry.payload.stats_by_tier);
+  const rawStatsByTier = asRecord(entry.payload.stats_by_tier);
+  const statsByTier = Object.keys(rawStatsByTier).length > 0 ? rawStatsByTier : asRecord(entry.payload.buffs_by_tier);
   const fixedStats = asRecord(entry.payload.fixed_stats);
   const tierRoll = asRecord(entry.payload.tier_roll);
   const materials = Array.isArray(entry.payload.materials) ? entry.payload.materials : [];
@@ -565,13 +582,14 @@ function AbilityBlock({ ability }: { ability: unknown }) {
   const name = String(record.name ?? record.key ?? "Habilidad");
   const type = String(record.type ?? "activa");
   const target = String(record.target ?? "self");
+  const slot = String(record.slot ?? "");
   const maxLevel = Number(record.max_level ?? 5);
   const levels = Array.isArray(record.levels) ? record.levels.map(String) : getFallbackAbilityLevels(type, target, maxLevel);
 
   return (
     <div className="ability-block">
       <div>
-        <strong>{name}</strong>
+        <strong>{slot ? `${slot} - ${name}` : name}</strong>
         <span>{getAbilityTypeLabel(type)} / {getTargetLabel(target)} / Max nivel {maxLevel}</span>
       </div>
       {record.description ? <p>{String(record.description)}</p> : null}
@@ -616,6 +634,9 @@ function groupCatalog(entries: ContentCatalogEntry[], selectedType: string, cont
 function getGroupKey(entry: ContentCatalogEntry, selectedType: string, content: ContentCatalogEntry[]) {
   if (selectedType === "hero") return getEntryAttribute(entry);
   if (selectedType === "resource") return `world_${entry.world_min}`;
+  if (selectedType === "zone") return "teleport";
+  if (selectedType === "pet") return entry.role ?? "pet";
+  if (selectedType === "badge" || selectedType === "achievement") return entry.category ?? selectedType;
   if (selectedType === "recipe") {
     const creates = typeof entry.payload.creates === "string" ? entry.payload.creates : "";
     const target = content.find((candidate) => candidate.content_key === creates);
@@ -633,13 +654,14 @@ function getGroupLabel(key: string, selectedType: string) {
     neutral: "Neutral",
   };
   if (selectedType === "hero") return labels[key] ?? key;
+  if (selectedType === "zone") return categoryLabels[key] ?? "Zonas por teleport";
+  if (selectedType === "pet") return getRoleLabel(key);
+  if (selectedType === "badge" || selectedType === "achievement") return categoryLabels[key] ?? getRoleLabel(key);
   return getRarityLabel(key);
 }
 
 function getGroupDescription(key: string, selectedType: string) {
-  if (key.startsWith("world_")) return "Materiales que empiezan a caer en este mundo.";
-  if (selectedType === "hero") return "Heroes agrupados por atributo principal.";
-  return rarityDescriptions[key] ?? "Grupo de contenido publicado.";
+  return "";
 }
 
 function groupSortValue(key: string) {
@@ -675,7 +697,9 @@ function getPreviewStats(entry: ContentCatalogEntry) {
     return Object.entries(fixedStats).slice(0, 4).map(([key, value]) => `${getStatLabel(key)} ${formatStatValue(key, value, "", "fixed")}`);
   }
   const statsByTier = asRecord(entry.payload.stats_by_tier);
-  const firstTier = Object.values(statsByTier)[0];
+  const petBuffsByTier = asRecord(entry.payload.buffs_by_tier);
+  const tierSource = Object.keys(statsByTier).length > 0 ? statsByTier : petBuffsByTier;
+  const firstTier = Object.values(tierSource)[0];
   return Object.entries(asRecord(firstTier)).slice(0, 4).map(([key, value]) => `${getStatLabel(key)} ${formatStatValue(key, value, "", "variable")}`);
 }
 
@@ -738,10 +762,19 @@ function getSourceLabel(entry: ContentCatalogEntry) {
   if (entry.content_type === "hero") return "Heroe jugable";
   if (entry.content_type === "recipe") return "Receta";
   if (entry.content_type === "ability") return "Habilidad";
+  if (entry.content_type === "pet") return "Mascota";
+  if (entry.content_type === "artifact") return entry.category === "pet_artifact" ? "Artefacto de mascota" : "Artefacto de heroe";
+  if (entry.content_type === "badge") return "Insignia";
+  if (entry.content_type === "achievement") return "Logro";
+  if (entry.content_type === "zone") return "Zona por teleport";
   if (source === "craft") return "Crafteo";
   if (source === "drop") return "Drop";
   if (source === "drop_resource") return "Material de drop";
   if (source === "shop") return "Compra futura";
+  if (source === "quest_or_drop") return "Mision o drop";
+  if (source === "drop_or_achievement") return "Drop o logro";
+  if (source === "achievement_or_role") return "Logro o rol";
+  if (source === "achievement_system") return "Sistema de logros";
   return typeLabels[entry.content_type] ?? entry.content_type;
 }
 
@@ -753,6 +786,10 @@ function getSourceShortLabel(source: string) {
     shop: "Compra futura",
     recipe: "Receta",
     hero: "Heroe",
+    quest_or_drop: "Mision/drop",
+    drop_or_achievement: "Drop/logro",
+    achievement_or_role: "Logro/rol",
+    achievement_system: "Logro",
   };
   return labels[source] ?? source;
 }
@@ -763,6 +800,16 @@ function getStatLabel(key: string) {
 
 function getStatDetail(key: string) {
   return statMeta[key]?.detail ?? "Stat especial del sistema de balance.";
+}
+
+function getAttributeLabel(attribute: string) {
+  const labels: Record<string, string> = {
+    fuerza: "Fuerza",
+    agilidad: "Agilidad",
+    inteligencia: "Inteligencia",
+    neutral: "Neutral",
+  };
+  return labels[attribute] ?? attribute;
 }
 
 function getAcquisitionRows(entry: ContentCatalogEntry) {

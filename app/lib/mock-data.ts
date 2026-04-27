@@ -1,7 +1,7 @@
 export const seasonStats = [
   { label: "Mundo maximo", value: "10" },
   { label: "Nivel maximo", value: "100" },
-  { label: "Zonas planificadas", value: "10" },
+  { label: "Zonas planificadas", value: "8" },
   { label: "Autosave", value: "10 min" },
 ];
 
@@ -60,7 +60,12 @@ export const adminSections = [
   "Balance",
   "Enemigos",
   "Items",
+  "Mascotas",
+  "Artefactos",
+  "Insignias",
+  "Logros",
   "Misiones",
+  "Zonas",
   "Temporadas",
   "Pagos",
   "Auditoria",

@@ -47,7 +47,7 @@ select {
   min-height: 100vh;
   background:
     linear-gradient(90deg, rgba(8, 9, 13, 0.97), rgba(8, 9, 13, 0.66)),
-    url("https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png") right 7vw top 96px / min(34vw, 380px) auto no-repeat fixed,
+    url("/assets/survival-rpg/04_overlays/overlay_mist_1920x1080.png") center top / cover no-repeat fixed,
     linear-gradient(135deg, #101521 0%, #12122a 44%, #241119 100%);
 }
 
@@ -1256,6 +1256,65 @@ pre {
   line-height: 1.45;
 }
 
+.admin-control-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-control-card {
+  min-height: 260px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(134, 189, 246, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(240, 191, 90, 0.09), transparent 44%),
+    linear-gradient(180deg, rgba(19, 26, 31, 0.92), rgba(12, 15, 21, 0.92));
+  box-shadow: var(--shadow);
+}
+
+.admin-card-head {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-card-head span {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-card-head strong {
+  font-size: 18px;
+}
+
+.admin-control-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.admin-section-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-section-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .mini-timeline {
   gap: 12px;
 }
@@ -1311,13 +1370,20 @@ pre {
 }
 
 .guide-detail summary {
-  display: flex;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 0.7fr) minmax(0, 1.3fr);
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   cursor: pointer;
   list-style: none;
   padding: 16px;
+}
+
+.guide-detail summary img {
+  width: 92px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .guide-detail summary::-webkit-details-marker {
@@ -1334,6 +1400,42 @@ pre {
   padding: 0 16px 16px 34px;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.badge-grid,
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.badge-card,
+.achievement-card {
+  display: grid;
+  gap: 10px;
+  min-height: 96px;
+  padding: 12px;
+  border: 1px solid rgba(240, 191, 90, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(240, 191, 90, 0.1), rgba(134, 189, 246, 0.06)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.badge-card {
+  grid-template-columns: 42px minmax(0, 1fr);
+}
+
+.badge-card span,
+.achievement-card span,
+.achievement-card p {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.achievement-card p {
+  margin: 0;
 }
 
 .catalog-filter-panel {
@@ -1489,10 +1591,22 @@ pre {
   border-color: rgba(199, 192, 178, 0.32);
 }
 
+.compact-catalog-card.rarity-basic {
+  background:
+    linear-gradient(145deg, rgba(199, 192, 178, 0.1), transparent 42%),
+    rgba(17, 22, 27, 0.92);
+}
+
 .compact-catalog-card.rarity-common,
 .rarity-tag.rarity-common,
 .linked-entry.rarity-common {
   border-color: rgba(120, 214, 144, 0.42);
+}
+
+.compact-catalog-card.rarity-common {
+  background:
+    linear-gradient(145deg, rgba(120, 214, 144, 0.12), transparent 42%),
+    rgba(17, 22, 27, 0.92);
 }
 
 .compact-catalog-card.rarity-rare,
@@ -1501,10 +1615,22 @@ pre {
   border-color: rgba(134, 189, 246, 0.52);
 }
 
+.compact-catalog-card.rarity-rare {
+  background:
+    linear-gradient(145deg, rgba(134, 189, 246, 0.15), transparent 42%),
+    rgba(17, 22, 27, 0.92);
+}
+
 .compact-catalog-card.rarity-epic,
 .rarity-tag.rarity-epic,
 .linked-entry.rarity-epic {
   border-color: rgba(179, 145, 255, 0.58);
+}
+
+.compact-catalog-card.rarity-epic {
+  background:
+    linear-gradient(145deg, rgba(179, 145, 255, 0.18), transparent 42%),
+    rgba(17, 22, 27, 0.92);
 }
 
 .compact-catalog-card.rarity-legendary,
@@ -1513,10 +1639,22 @@ pre {
   border-color: rgba(240, 191, 90, 0.62);
 }
 
+.compact-catalog-card.rarity-legendary {
+  background:
+    linear-gradient(145deg, rgba(240, 191, 90, 0.2), transparent 42%),
+    rgba(17, 22, 27, 0.92);
+}
+
 .compact-catalog-card.rarity-mythic,
 .rarity-tag.rarity-mythic,
 .linked-entry.rarity-mythic {
   border-color: rgba(240, 111, 63, 0.66);
+}
+
+.compact-catalog-card.rarity-mythic {
+  background:
+    linear-gradient(145deg, rgba(240, 111, 63, 0.22), transparent 42%),
+    rgba(17, 22, 27, 0.92);
 }
 
 .rarity-tag {
@@ -1806,12 +1944,15 @@ pre {
 
 @media (max-width: 1100px) {
   .feature-grid,
+  .admin-control-grid,
   .admin-chart-grid,
   .change-strip,
   .guide-grid,
   .acquisition-grid,
   .stat-chip-grid,
   .upgrade-grid,
+  .badge-grid,
+  .achievement-grid,
   .ability-grid,
   .compact-catalog-grid,
   .modal-tier-grid {
@@ -1833,12 +1974,15 @@ pre {
   .feature-grid,
   .player-grid,
   .split-section,
+  .admin-control-grid,
   .admin-chart-grid,
   .change-strip,
   .guide-grid,
   .acquisition-grid,
   .stat-chip-grid,
   .upgrade-grid,
+  .badge-grid,
+  .achievement-grid,
   .ability-grid,
   .compact-catalog-grid,
   .catalog-filter-panel,
@@ -1849,6 +1993,16 @@ pre {
 
   .sticky-filter-section {
     position: static;
+  }
+
+  .guide-detail summary {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-detail summary img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   .craft-flow {

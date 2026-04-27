@@ -20,6 +20,8 @@ export type PlayerProfileData = {
     last_save_at: string | null;
   }>;
   cosmeticsCount: number;
+  badges: PlayerBadgeRow[];
+  achievements: PlayerAchievementRow[];
 };
 
 export type PublicPlayerProfileData = {
@@ -40,6 +42,36 @@ export type PublicPlayerProfileData = {
     last_save_at: string | null;
   }>;
   cosmeticsCount: number;
+  badges: PlayerBadgeRow[];
+  achievements: PlayerAchievementRow[];
+};
+
+export type PlayerBadgeRow = {
+  badge_key: string;
+  season_id: string | null;
+  awarded_at: string | null;
+  badge_definitions?: {
+    name_es: string;
+    summary_es: string | null;
+    category: string;
+    rarity: string;
+    image_url: string | null;
+  } | null;
+};
+
+export type PlayerAchievementRow = {
+  achievement_key: string;
+  season_id: string | null;
+  progress: number;
+  completed: boolean;
+  completed_at: string | null;
+  achievement_definitions?: {
+    name_es: string;
+    summary_es: string | null;
+    category: string;
+    points: number;
+    image_url: string | null;
+  } | null;
 };
 
 export type PublicPlayerSearchRow = {
@@ -83,7 +115,7 @@ export type PublicPlayerHeroDetail = {
 
 export async function getPlayerProfileData(steamId: string): Promise<PlayerProfileData> {
   const supabase = getSupabaseAdminClient();
-  const [{ data: player }, { data: heroes }, { count: cosmeticsCount }] = await Promise.all([
+  const [{ data: player }, { data: heroes }, { count: cosmeticsCount }, badges, achievements] = await Promise.all([
     supabase
       .from("players")
       .select("steam_id, display_name, avatar_url, country, updated_at")
@@ -99,18 +131,22 @@ export async function getPlayerProfileData(steamId: string): Promise<PlayerProfi
       .from("account_cosmetics")
       .select("id", { count: "exact", head: true })
       .eq("steam_id", steamId),
+    getPlayerBadges(steamId),
+    getPlayerAchievements(steamId),
   ]);
 
   return {
     player: player ?? null,
     heroes: heroes ?? [],
     cosmeticsCount: cosmeticsCount ?? 0,
+    badges,
+    achievements,
   };
 }
 
 export async function getPublicPlayerProfileData(steamId: string): Promise<PublicPlayerProfileData> {
   const supabase = getSupabaseAdminClient();
-  const [{ data: player }, { data: heroes }, { count: cosmeticsCount }] = await Promise.all([
+  const [{ data: player }, { data: heroes }, { count: cosmeticsCount }, badges, achievements] = await Promise.all([
     supabase
       .from("players")
       .select("steam_id, display_name, avatar_url, country, updated_at")
@@ -126,13 +162,67 @@ export async function getPublicPlayerProfileData(steamId: string): Promise<Publi
       .from("account_cosmetics")
       .select("id", { count: "exact", head: true })
       .eq("steam_id", steamId),
+    getPlayerBadges(steamId),
+    getPlayerAchievements(steamId),
   ]);
 
   return {
     player: player ?? null,
     heroes: heroes ?? [],
     cosmeticsCount: cosmeticsCount ?? 0,
+    badges,
+    achievements,
   };
+}
+
+async function getPlayerBadges(steamId: string): Promise<PlayerBadgeRow[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("player_badges")
+      .select("badge_key, season_id, awarded_at, badge_definitions(name_es, summary_es, category, rarity, image_url)")
+      .eq("steam_id", steamId)
+      .order("awarded_at", { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((row) => ({
+      badge_key: String(row.badge_key),
+      season_id: row.season_id,
+      awarded_at: row.awarded_at,
+      badge_definitions: firstRelation(row.badge_definitions),
+    })) as PlayerBadgeRow[];
+  } catch {
+    return [];
+  }
+}
+
+async function getPlayerAchievements(steamId: string): Promise<PlayerAchievementRow[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("player_achievements")
+      .select("achievement_key, season_id, progress, completed, completed_at, achievement_definitions(name_es, summary_es, category, points, image_url)")
+      .eq("steam_id", steamId)
+      .order("completed", { ascending: false })
+      .order("completed_at", { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((row) => ({
+      achievement_key: String(row.achievement_key),
+      season_id: row.season_id,
+      progress: Number(row.progress ?? 0),
+      completed: Boolean(row.completed),
+      completed_at: row.completed_at,
+      achievement_definitions: firstRelation(row.achievement_definitions),
+    })) as PlayerAchievementRow[];
+  } catch {
+    return [];
+  }
+}
+
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 export async function searchPublicPlayers(query = ""): Promise<PublicPlayerSearchRow[]> {

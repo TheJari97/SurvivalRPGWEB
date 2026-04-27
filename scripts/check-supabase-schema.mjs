@@ -21,6 +21,10 @@ const checks = [
   ["public_content_catalog", "content_type,content_key,name_es"],
   ["game_balance_versions", "version_key,status"],
   ["public_balance_change_log", "version_key,content_key,change_type"],
+  ["badge_definitions", "badge_key,name_es,category,rarity,active"],
+  ["player_badges", "steam_id,badge_key,season_id,awarded_at"],
+  ["achievement_definitions", "achievement_key,name_es,category,points,active"],
+  ["player_achievements", "steam_id,achievement_key,season_id,completed"],
 ];
 
 let failed = false;

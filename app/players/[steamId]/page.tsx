@@ -43,6 +43,7 @@ export default async function PublicPlayerPage({
 
       <nav className="subnav" aria-label="Subsecciones de perfil publico">
         <a href="#resumen">Resumen</a>
+        <a href="#insignias">Insignias</a>
         <a href="#personajes">Personajes</a>
       </nav>
 
@@ -52,6 +53,26 @@ export default async function PublicPlayerPage({
           <div className="stat"><strong>{highest(profile.heroes.map((hero) => hero.level))}</strong><span>Nivel maximo</span></div>
           <div className="stat"><strong>{highest(profile.heroes.map((hero) => hero.world_level))}</strong><span>Mundo maximo</span></div>
           <div className="stat"><strong>{profile.cosmeticsCount}</strong><span>Cosmeticos</span></div>
+          <div className="stat"><strong>{profile.badges.length}</strong><span>Insignias</span></div>
+          <div className="stat"><strong>{profile.achievements.filter((achievement) => achievement.completed).length}</strong><span>Logros</span></div>
+        </div>
+      </section>
+
+      <section className="section" id="insignias">
+        <div className="catalog-toolbar-line">
+          <h2>Insignias publicas</h2>
+          <span className="count-badge">{profile.badges.length}</span>
+        </div>
+        <div className="badge-grid">
+          {profile.badges.length > 0 ? profile.badges.map((badge) => (
+            <article className="badge-card" key={`${badge.badge_key}:${badge.season_id ?? "global"}`}>
+              {badge.badge_definitions?.image_url ? <img className="mini-avatar" src={badge.badge_definitions.image_url} alt="" /> : <span className="mini-avatar fallback">IN</span>}
+              <div>
+                <strong>{badge.badge_definitions?.name_es ?? badge.badge_key}</strong>
+                <span>{badge.badge_definitions?.summary_es ?? "Insignia de cuenta"}</span>
+              </div>
+            </article>
+          )) : <article className="card empty-state-card"><p>Sin insignias publicas aun.</p></article>}
         </div>
       </section>
 

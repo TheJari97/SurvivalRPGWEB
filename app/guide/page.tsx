@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentLanguage, getDictionary, translate } from "../lib/i18n";
+import { homeScenes } from "../lib/visuals";
 
 export default async function GuidePage() {
   const language = await getCurrentLanguage();
@@ -15,6 +16,7 @@ export default async function GuidePage() {
     {
       title: "1. Primeros pasos",
       lead: "Entra con Steam, elige un heroe y juega Mundo 1 hasta nivel 10.",
+      image: homeScenes.login,
       rows: [
         "Cada SteamID guarda varios heroes, pero cada heroe tiene nivel, oro, inventario, misiones y mascota propia.",
         "El oro no se comparte entre heroes. Los cosmeticos de cuenta si podran compartirse cuando el sistema este listo.",
@@ -24,6 +26,7 @@ export default async function GuidePage() {
     {
       title: "2. Drops, rareza y tiers",
       lead: "Rareza y tier no significan lo mismo.",
+      image: homeScenes.zones,
       rows: [
         "Rareza es el color/familia del item: basico, comun, raro, epico, legendario y mitico.",
         "Tier es la calidad del roll interno de stats. Un item comun Tier 5 sigue siendo comun, pero con mejores numeros.",
@@ -33,6 +36,7 @@ export default async function GuidePage() {
     {
       title: "3. Crafteo",
       lead: "El NPC de crafteo crea items variables usando materiales.",
+      image: homeScenes.crafting,
       rows: [
         "Cada receta pide materiales especificos. Al craftear, el resultado puede salir en distintos tiers.",
         "Los crafteos no son iguales a los items comprables. Los comprables tienen stats fijos y no se usan para recetas principales.",
@@ -42,6 +46,7 @@ export default async function GuidePage() {
     {
       title: "4. Fallo de crafteo y estabilizadores",
       lead: "Las piedras de estabilizacion reducen riesgo y ayudan a mejorar el resultado.",
+      image: homeScenes.crafting,
       rows: [
         "Piedra de Estabilizacion Comun: cae desde Mundo 1 y ayuda en crafteos basicos/comunes.",
         "Piedra Azul de Mejora: cae desde Mundo 2 y permite empujar piezas comunes hacia raras.",
@@ -52,6 +57,7 @@ export default async function GuidePage() {
     {
       title: "5. Upgrades de rareza",
       lead: "Un item puede mejorar de color usando piedras y materiales del mundo correcto.",
+      image: homeScenes.ranking,
       rows: [
         "Basico a comun: materiales de Mundo 1.",
         "Comun a raro: materiales de Mundo 2 o superior.",
@@ -63,6 +69,7 @@ export default async function GuidePage() {
     {
       title: "6. Tienda y pagos",
       lead: "La tienda publica queda bloqueada hasta cerrar seguridad, auditoria y entrega.",
+      image: homeScenes.season,
       rows: [
         "La tienda de oro dentro del juego servira como ayuda, pero no vendera items crafteables.",
         "Los pagos reales quedan apagados hasta tener pasarela, auditoria, logs y entrega segura desde Supabase.",
@@ -103,6 +110,7 @@ export default async function GuidePage() {
           {sections.map((section) => (
             <details className="guide-detail" key={section.title} open>
               <summary>
+                <img src={section.image} alt="" />
                 <strong>{section.title}</strong>
                 <span>{section.lead}</span>
               </summary>

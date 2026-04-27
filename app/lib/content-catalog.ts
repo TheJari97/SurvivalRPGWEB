@@ -32,11 +32,22 @@ export type BalanceChangeLogEntry = {
   created_at: string;
 };
 
+export type SeasonEntry = {
+  season_id: string;
+  name_es: string;
+  name_en: string | null;
+  active: boolean;
+};
+
 const PUBLIC_GAME_CHANGE_TYPES = new Set([
   "hero",
   "item",
   "recipe",
   "pet",
+  "artifact",
+  "badge",
+  "achievement",
+  "season",
   "monster",
   "quest",
   "zone",
@@ -55,7 +66,7 @@ export async function getPublishedContent(contentType?: string): Promise<Content
     let query = supabase
       .from("public_content_catalog")
       .select("content_type, content_key, name_es, summary_es, category, role, world_min, world_max, tier_min, tier_max, payload, version, updated_at")
-      .limit(500);
+      .limit(1000);
 
     if (contentType) {
       query = query.eq("content_type", contentType);
@@ -64,6 +75,23 @@ export async function getPublishedContent(contentType?: string): Promise<Content
     const { data, error } = await query;
     if (error || !data) return [];
     return data as ContentCatalogEntry[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublishedSeasons(): Promise<SeasonEntry[]> {
+  if (!appConfig.supabaseUrl || !appConfig.supabasePublishableKey) return [];
+
+  try {
+    const supabase = createClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey);
+    const { data, error } = await supabase
+      .from("seasons")
+      .select("season_id, name_es, name_en, active")
+      .order("season_id", { ascending: false });
+
+    if (error || !data) return [];
+    return data as SeasonEntry[];
   } catch {
     return [];
   }
