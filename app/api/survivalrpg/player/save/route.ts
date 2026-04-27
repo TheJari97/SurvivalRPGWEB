@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient, writeAdminAuditLog } from "../../../../lib/admin-auth";
-import { asRecord, asString, authorizeServerRequest, clampInt, getRequestMeta, getSteamDisplayName, validateAddonVersion } from "../../../../lib/server-api";
+import { asRecord, asString, authorizeServerRequest, clampInt, getRequestMeta, getSteamDisplayName, isLocalToolsSteamIdAllowed, validateAddonVersion } from "../../../../lib/server-api";
 
 export async function POST(request: NextRequest) {
   const auth = authorizeServerRequest(request);
@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
 
   if (!steamId || activeHero === "unknown") {
     return NextResponse.json({ ok: false, error: "steam_id and active_hero are required." }, { status: 400 });
+  }
+
+  if (auth.mode === "local-tools" && !isLocalToolsSteamIdAllowed(steamId)) {
+    return NextResponse.json({ ok: false, error: "SteamID is not allowed for local tools saves." }, { status: 403 });
+  }
+
+  if (clampInt(body.schema_version, 0, 999, 0) !== 2) {
+    return NextResponse.json({ ok: false, error: "Unsupported save schema_version." }, { status: 400 });
   }
 
   const heroes = asRecord(body.heroes);

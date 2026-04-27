@@ -12,7 +12,8 @@
     "check:supabase": "node scripts/check-supabase-schema.mjs",
     "check:vercel-env": "node scripts/check-vercel-env.mjs",
     "check:vercel-deployments": "node scripts/check-vercel-deployments.mjs",
-    "vercel:update-db": "node scripts/update-vercel-database-url.mjs"
+    "vercel:update-db": "node scripts/update-vercel-database-url.mjs",
+    "vercel:update-env": "node scripts/update-vercel-env.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",

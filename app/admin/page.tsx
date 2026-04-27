@@ -45,6 +45,10 @@ export default async function AdminPage() {
             <strong>{dashboard.auditLogsCount}</strong>
             <span>Eventos de auditoria</span>
           </div>
+          <div className="stat">
+            <strong>{dashboard.publishedContentCount}</strong>
+            <span>Catalogo publicado</span>
+          </div>
         </div>
       </section>
 

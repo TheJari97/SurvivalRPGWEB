@@ -342,6 +342,13 @@ td[colspan] {
   color: var(--muted);
 }
 
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
 .form-card {
   display: grid;
   gap: 14px;

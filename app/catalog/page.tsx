@@ -1,6 +1,8 @@
-import { heroRoles } from "../lib/mock-data";
+import { getEntryTags, getPublishedContent } from "../lib/content-catalog";
 
-export default function CatalogPage() {
+export default async function CatalogPage() {
+  const heroes = await getPublishedContent("hero");
+
   return (
     <main className="page">
       <section className="section">
@@ -15,16 +17,22 @@ export default function CatalogPage() {
       <section className="section">
         <h2>Heroes por rol</h2>
         <div className="grid">
-          {heroRoles.map((hero) => (
-            <article className="card" key={hero.name}>
-              <p className="eyebrow">{hero.role}</p>
-              <h3>{hero.name}</h3>
-              <p>{hero.text}</p>
+          {heroes.length > 0 ? heroes.map((hero) => (
+            <article className="card" key={hero.content_key}>
+              <p className="eyebrow">{hero.category ?? hero.role ?? "Heroe"}</p>
+              <h3>{hero.name_es}</h3>
+              <p>{hero.summary_es}</p>
               <div className="tag-row">
-                {hero.tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}
+                {getEntryTags(hero).map((tag) => <span className="tag" key={tag}>{tag}</span>)}
               </div>
             </article>
-          ))}
+          )) : (
+            <article className="card">
+              <p className="eyebrow">Sin catalogo</p>
+              <h3>Contenido pendiente</h3>
+              <p>Cuando se publiquen datos en Supabase, apareceran aqui.</p>
+            </article>
+          )}
         </div>
       </section>
     </main>

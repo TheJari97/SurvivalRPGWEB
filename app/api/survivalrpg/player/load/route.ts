@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "../../../../lib/admin-auth";
-import { asRecord, asString, authorizeServerRequest, validateAddonVersion } from "../../../../lib/server-api";
+import { asRecord, asString, authorizeServerRequest, isLocalToolsSteamIdAllowed, validateAddonVersion } from "../../../../lib/server-api";
 
 export async function POST(request: NextRequest) {
   const auth = authorizeServerRequest(request);
@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
 
   if (!steamId) {
     return NextResponse.json({ ok: false, error: "steam_id is required." }, { status: 400 });
+  }
+
+  if (auth.mode === "local-tools" && !isLocalToolsSteamIdAllowed(steamId)) {
+    return NextResponse.json({ ok: false, error: "SteamID is not allowed for local tools loads." }, { status: 403 });
   }
 
   if (!validateAddonVersion(addonVersion)) {

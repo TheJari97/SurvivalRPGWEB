@@ -52,3 +52,13 @@ export function validateAddonVersion(addonVersion: string | null) {
   if (!allowed || !addonVersion) return true;
   return addonVersion === allowed;
 }
+
+export function isLocalToolsSteamIdAllowed(steamId: string) {
+  const rawAllowlist = process.env.SRPG_LOCAL_SAVE_ALLOWED_STEAM_IDS || process.env.ADMIN_STEAM_IDS || "";
+  const allowlist = rawAllowlist
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return allowlist.includes(steamId);
+}

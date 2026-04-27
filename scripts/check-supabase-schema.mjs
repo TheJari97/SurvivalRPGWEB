@@ -16,6 +16,8 @@ const checks = [
   ["public_rankings", "display_name,hero_name,level,world_level,gear_score"],
   ["game_save_events", "steam_id,hero_name,status"],
   ["admin_dashboard_summary", "players_count,heroes_count,accepted_saves_count"],
+  ["game_content_catalog", "content_type,content_key,status"],
+  ["public_content_catalog", "content_type,content_key,name_es"],
 ];
 
 let failed = false;

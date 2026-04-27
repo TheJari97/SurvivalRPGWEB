@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { heroRoles, seasonStats } from "./lib/mock-data";
+import { seasonStats } from "./lib/mock-data";
+import { getEntryTags, getPublishedContent } from "./lib/content-catalog";
 import { getPublicRankings } from "./lib/rankings";
 
 export default async function HomePage() {
-  const rankings = await getPublicRankings();
+  const [rankings, heroes] = await Promise.all([
+    getPublicRankings(),
+    getPublishedContent("hero"),
+  ]);
 
   return (
     <main className="page">
@@ -40,16 +44,22 @@ export default async function HomePage() {
       <section className="section">
         <h2>Roles principales</h2>
         <div className="grid">
-          {heroRoles.slice(0, 3).map((hero) => (
-            <article className="card" key={hero.name}>
-              <p className="eyebrow">{hero.role}</p>
-              <h3>{hero.name}</h3>
-              <p>{hero.text}</p>
+          {heroes.length > 0 ? heroes.slice(0, 3).map((hero) => (
+            <article className="card" key={hero.content_key}>
+              <p className="eyebrow">{hero.category ?? hero.role ?? "Heroe"}</p>
+              <h3>{hero.name_es}</h3>
+              <p>{hero.summary_es}</p>
               <div className="tag-row">
-                {hero.tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}
+                {getEntryTags(hero).map((tag) => <span className="tag" key={tag}>{tag}</span>)}
               </div>
             </article>
-          ))}
+          )) : (
+            <article className="card">
+              <p className="eyebrow">Catalogo</p>
+              <h3>Sin datos publicados</h3>
+              <p>Los heroes apareceran cuando la migracion de catalogo este aplicada en Supabase.</p>
+            </article>
+          )}
         </div>
       </section>
 
@@ -68,7 +78,7 @@ export default async function HomePage() {
               </tr>
             </thead>
             <tbody>
-              {rankings.map((row) => (
+              {rankings.length > 0 ? rankings.map((row) => (
                 <tr key={row.rank}>
                   <td>{row.rank}</td>
                   <td>{row.player}</td>
@@ -77,7 +87,11 @@ export default async function HomePage() {
                   <td>{row.world}</td>
                   <td>{row.gear}</td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6}>Sin guardados reales todavia.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
