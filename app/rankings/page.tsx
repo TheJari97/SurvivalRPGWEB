@@ -4,7 +4,7 @@ import { getSteamUserSession } from "../lib/steam-auth";
 
 const rankingTabs = [
   { key: "progress", label: "Progreso" },
-  { key: "damage", label: "Mayor dano" },
+  { key: "damage", label: "Mayor daño" },
   { key: "gear", label: "Gear" },
   { key: "world", label: "Mundo" },
 ];
@@ -30,7 +30,7 @@ export default async function RankingsPage({
         <p className="eyebrow">Rankings publicos</p>
         <h1>Rankings</h1>
         <p className="lead">
-          Tablas separadas para avance, dano, gear y mundo. Cuando entren guardados reales con mas metricas,
+          Tablas separadas para avance, daño, gear y mundo. Cuando entren guardados reales con mas metricas,
           cada seccion se alimentara desde Supabase.
         </p>
       </section>
@@ -58,7 +58,7 @@ export default async function RankingsPage({
 
       <section className="section">
         {selected === "damage" ? (
-          <EmptyRanking title="Mayor dano" text="Esta subseccion queda lista para cuando el modo envie dano total, mayor golpe y DPS por guardado." />
+          <EmptyRanking title="Mayor daño" text="Esta subseccion queda lista para cuando el modo envie daño total, mayor golpe y DPS por guardado." />
         ) : (
           <RankingTable rows={sorted} selected={selected} />
         )}

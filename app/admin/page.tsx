@@ -214,7 +214,7 @@ function getSectionText(section: string) {
     Sanciones: "Pendiente: bloqueo temporal/permanente y motivo auditable.",
     Balance: "Pendiente: editar borradores de balance y publicar versiones.",
     Enemigos: "Pendiente: administrar monster_configs y estadisticas.",
-    Items: "Pendiente: catalogo administrable de items, tiers y recetas.",
+    Items: "Revision interna de items, tiers, recetas, drops y recursos publicados.",
     Misiones: "Pendiente: administracion de misiones obligatorias/opcionales.",
     Temporadas: "Temporada activa conectada a season_001.",
     Pagos: "PayPal y MercadoPago quedan apagados hasta backend seguro.",
@@ -228,6 +228,7 @@ function getSectionHref(section: string) {
     Jugadores: "/admin/players",
     Cuentas: "/admin/accounts",
     Progreso: "/admin/players",
+    Items: "/admin/items",
     Auditoria: "/admin/players",
   };
   return routes[section] ?? `#${section.toLowerCase()}`;

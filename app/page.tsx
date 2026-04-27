@@ -34,11 +34,16 @@ export default async function HomePage() {
           <div className="panel-header">
             <div>
               <strong>Temporada 001</strong>
-              <span>Fundacional</span>
+              <span>Expedicion fundacional</span>
             </div>
             <span className="status">Preparando beta</span>
           </div>
           <img className="season-art" src={homeScenes.season} alt="" />
+          <div className="hero-progress-list">
+            <span>Zona 0: Hub y guardado</span>
+            <span>Zona 1: Bosque salvaje</span>
+            <span>Meta: jefe de zona y crafteo inicial</span>
+          </div>
           <div className="stat-grid">
             {seasonStats.map((stat) => (
               <div className="stat" key={stat.label}>
@@ -65,11 +70,11 @@ export default async function HomePage() {
             </div>
           </Link>
           <Link className="feature-card vivid-card" href="/rankings">
-            <img src={homeScenes.ranking} alt="" />
+              <img src={homeScenes.ranking} alt="" />
             <div>
               <p className="eyebrow">Competencia</p>
               <h3>Rankings separados</h3>
-              <p>Progreso, mundo, gear y espacio preparado para dano total, mayor golpe y DPS real.</p>
+              <p>Progreso, mundo, gear y espacio preparado para daño total, mayor golpe y DPS real.</p>
             </div>
           </Link>
           <Link className="feature-card vivid-card" href="/catalog?tipo=hero">

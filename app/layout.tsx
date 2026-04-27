@@ -18,7 +18,6 @@ const navItems = [
   { href: "/catalog", labelKey: "nav.catalog" },
   { href: "/players", labelKey: "nav.players" },
   { href: "/changelog", labelKey: "nav.changelog" },
-  { href: "/shop", labelKey: "nav.shop" },
   { href: "/guide", labelKey: "nav.guide" },
   { href: "/profile", labelKey: "nav.profile" },
 ];
@@ -37,8 +36,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <div className="shell">
           <header className="topbar">
             <Link className="brand" href="/">
-              <span className="brand-mark">SR</span>
-              <span className="brand-dota" aria-label="Dota 2">D2</span>
+              <span className="brand-emblem" aria-hidden="true">
+                <span>SR</span>
+              </span>
               <span>SurvivalRPG</span>
             </Link>
             <nav className="nav" aria-label="Principal">

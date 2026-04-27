@@ -37,7 +37,7 @@ const roleLabels: Record<string, string> = {
 };
 
 export const homeScenes = {
-  season: `${cdn}/heroes/windrunner.png`,
+  season: `${cdn}/heroes/earthshaker.png`,
   crafting: `${cdn}/items/recipe.png`,
   ranking: `${cdn}/heroes/phantom_assassin.png`,
   pets: `${cdn}/heroes/lone_druid.png`,

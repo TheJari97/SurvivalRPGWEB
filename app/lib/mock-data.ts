@@ -34,13 +34,13 @@ export const heroRoles = [
   {
     name: "Corte Umbrio",
     role: "Assassin",
-    text: "Busca ventanas de dano, movilidad y evasion.",
+    text: "Busca ventanas de daño, movilidad y evasion.",
     tags: ["evasion", "burst", "movilidad"],
   },
   {
     name: "Arcanista del Claro",
     role: "Mage",
-    text: "Usa dano magico, control y escalado de atributo principal.",
+    text: "Usa daño magico, control y escalado de atributo principal.",
     tags: ["magia", "mana", "control"],
   },
   {
