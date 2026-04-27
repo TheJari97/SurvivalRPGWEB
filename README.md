@@ -42,6 +42,6 @@ C:\Users\JuanA\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin
 - `/rankings` rankings publicos.
 - `/catalog` catalogo publico.
 - `/profile` perfil del jugador.
-- `/admin/login` entrada privada del panel administrador.
+- `/admin/login` entrada privada por SteamID.
 - `/admin` panel administrador.
 - `/api/health` healthcheck.

@@ -75,26 +75,6 @@ order by v.published_at desc nulls last, l.created_at desc;
 
 grant select on public.public_balance_change_log to anon, authenticated;
 
-create table if not exists public.admin_password_reset_requests (
-  id uuid primary key default gen_random_uuid(),
-  admin_account_id uuid not null references public.admin_accounts(id) on delete cascade,
-  requested_by_admin_id uuid references public.admin_accounts(id) on delete set null,
-  status text not null default 'requested' check (status in ('requested', 'completed', 'cancelled')),
-  reason text,
-  created_at timestamptz not null default now(),
-  completed_at timestamptz
-);
-
-create index if not exists idx_admin_password_reset_requests_account
-on public.admin_password_reset_requests (admin_account_id, created_at desc);
-
-alter table public.admin_password_reset_requests enable row level security;
-
-drop policy if exists "service role manages admin password reset requests" on public.admin_password_reset_requests;
-create policy "service role manages admin password reset requests" on public.admin_password_reset_requests
-for all using (auth.role() = 'service_role')
-with check (auth.role() = 'service_role');
-
 insert into public.game_balance_versions(version_key, title_es, summary_es, status, published_at)
 values (
   'balance_0_6_0_pre',

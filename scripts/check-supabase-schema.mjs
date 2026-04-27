@@ -11,7 +11,8 @@ if (!supabaseUrl || !serviceRoleKey) {
 const checks = [
   ["seasons", "season_id,name_es,active"],
   ["players", "steam_id,display_name"],
-  ["admin_accounts", "username,active,must_change_password"],
+  ["player_roles", "steam_id,role,active"],
+  ["admin_staff_profiles", "steam_id,display_name,avatar_url,role,roles,active,permissions"],
   ["admin_role_permissions", "role,permission"],
   ["public_rankings", "display_name,hero_name,level,world_level,gear_score"],
   ["game_save_events", "steam_id,hero_name,status"],
@@ -20,7 +21,6 @@ const checks = [
   ["public_content_catalog", "content_type,content_key,name_es"],
   ["game_balance_versions", "version_key,status"],
   ["public_balance_change_log", "version_key,content_key,change_type"],
-  ["admin_password_reset_requests", "id,status"],
 ];
 
 let failed = false;

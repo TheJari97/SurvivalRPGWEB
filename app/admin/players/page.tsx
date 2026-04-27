@@ -10,7 +10,6 @@ export default async function AdminPlayersPage({
 }) {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
-  if (session.mustChangePassword) redirect("/admin/change-password");
 
   const params = await searchParams;
   const query = params?.q ?? "";
@@ -47,6 +46,7 @@ export default async function AdminPlayersPage({
               <tr>
                 <th>SteamID</th>
                 <th>Nombre</th>
+                <th>Avatar</th>
                 <th>Personajes</th>
                 <th>Nivel max</th>
                 <th>Mundo max</th>
@@ -59,6 +59,7 @@ export default async function AdminPlayersPage({
                 <tr key={player.steam_id}>
                   <td>{player.steam_id}</td>
                   <td>{player.display_name ?? "Sin nombre"}</td>
+                  <td>{player.avatar_url ? <img className="mini-avatar" src={player.avatar_url} alt="" /> : <span className="mini-avatar fallback">SR</span>}</td>
                   <td>{player.hero_count}</td>
                   <td>{player.max_level}</td>
                   <td>{player.max_world}</td>
@@ -67,7 +68,7 @@ export default async function AdminPlayersPage({
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7}>No hay jugadores con ese filtro.</td>
+                  <td colSpan={8}>No hay jugadores con ese filtro.</td>
                 </tr>
               )}
             </tbody>

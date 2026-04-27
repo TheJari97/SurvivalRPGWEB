@@ -10,7 +10,6 @@ export default async function AdminPlayerDetailPage({
 }) {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
-  if (session.mustChangePassword) redirect("/admin/change-password");
 
   const { steamId } = await params;
   const detail = await getAdminPlayerDetail(steamId);
@@ -20,10 +19,16 @@ export default async function AdminPlayerDetailPage({
     <main className="page">
       <section className="section">
         <p className="eyebrow">Admin jugador</p>
-        <h1>{playerName}</h1>
-        <p className="lead">SteamID {steamId}. Vista interna para revisar progreso completo y eventos.</p>
+        <div className="profile-title-row">
+          {detail.player?.avatar_url ? <img className="steam-avatar" src={detail.player.avatar_url} alt="" /> : <span className="steam-avatar fallback">SR</span>}
+          <div>
+            <h1>{playerName}</h1>
+            <p className="lead">SteamID {steamId}. Vista interna para revisar progreso completo y eventos.</p>
+          </div>
+        </div>
         <div className="actions">
           <Link className="button secondary" href="/admin/players">Volver a jugadores</Link>
+          <Link className="button secondary" href={`/players/${encodeURIComponent(steamId)}`}>Ver publico</Link>
         </div>
       </section>
 

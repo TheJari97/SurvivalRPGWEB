@@ -32,6 +32,21 @@ export type BalanceChangeLogEntry = {
   created_at: string;
 };
 
+const PUBLIC_GAME_CHANGE_TYPES = new Set([
+  "hero",
+  "item",
+  "recipe",
+  "pet",
+  "monster",
+  "quest",
+  "zone",
+  "world_level",
+  "ability",
+  "npc",
+  "terrain",
+  "map",
+]);
+
 export async function getPublishedContent(contentType?: string): Promise<ContentCatalogEntry[]> {
   if (!appConfig.supabaseUrl || !appConfig.supabasePublishableKey) return [];
 
@@ -65,7 +80,8 @@ export async function getPublishedChangeLog(): Promise<BalanceChangeLogEntry[]> 
       .limit(50);
 
     if (error || !data) return [];
-    return data as BalanceChangeLogEntry[];
+    return (data as BalanceChangeLogEntry[])
+      .filter((change) => PUBLIC_GAME_CHANGE_TYPES.has(change.content_type));
   } catch {
     return [];
   }

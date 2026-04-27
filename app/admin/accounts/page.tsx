@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminSession } from "../../lib/admin-auth";
-import { getAdminAccounts } from "../../lib/admin-data";
+import { getAdminStaffMembers } from "../../lib/admin-data";
 
 export default async function AdminAccountsPage({
   searchParams,
@@ -10,19 +10,18 @@ export default async function AdminAccountsPage({
 }) {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
-  if (session.mustChangePassword) redirect("/admin/change-password");
 
   const params = await searchParams;
   const query = params?.q ?? "";
-  const accounts = await getAdminAccounts(query);
+  const staffMembers = await getAdminStaffMembers(query);
 
   return (
     <main className="page">
       <section className="section">
         <p className="eyebrow">Admin</p>
-        <h1>Cuentas internas</h1>
+        <h1>Equipo interno</h1>
         <p className="lead">
-          Lista de administradores, moderadores y soportes. El reset marca cambio obligatorio y deja auditoria.
+          Administradores, moderadores y soportes ligados a SteamID. El acceso ya no usa usuario ni contrasena.
         </p>
         <div className="actions">
           <Link className="button secondary" href="/admin">Panel</Link>
@@ -32,8 +31,8 @@ export default async function AdminAccountsPage({
       <section className="section toolbar-section">
         <form className="toolbar" action="/admin/accounts">
           <label className="field compact-field">
-            <span>Buscar cuenta</span>
-            <input className="input" name="q" type="search" placeholder="Usuario o SteamID" defaultValue={query} />
+            <span>Buscar miembro</span>
+            <input className="input" name="q" type="search" placeholder="SteamID, nombre o rol" defaultValue={query} />
           </label>
           <button className="button" type="submit">Buscar</button>
         </form>
@@ -44,32 +43,29 @@ export default async function AdminAccountsPage({
           <table>
             <thead>
               <tr>
-                <th>Usuario</th>
+                <th>Avatar</th>
+                <th>Nombre Steam</th>
                 <th>SteamID</th>
+                <th>Rol</th>
                 <th>Activa</th>
-                <th>Cambio obligatorio</th>
-                <th>Resets abiertos</th>
-                <th>Accion</th>
+                <th>Permisos</th>
+                <th>Publico</th>
               </tr>
             </thead>
             <tbody>
-              {accounts.length > 0 ? accounts.map((account) => (
-                <tr key={account.id}>
-                  <td>{account.username}</td>
-                  <td>{account.steam_id ?? "Sin SteamID"}</td>
-                  <td>{account.active ? "Si" : "No"}</td>
-                  <td>{account.must_change_password ? "Si" : "No"}</td>
-                  <td>{account.reset_requests_count}</td>
-                  <td>
-                    <form action="/api/admin/accounts/request-password-reset" method="post">
-                      <input name="accountId" type="hidden" value={account.id} />
-                      <button className="button secondary" type="submit">Solicitar reset</button>
-                    </form>
-                  </td>
+              {staffMembers.length > 0 ? staffMembers.map((staff) => (
+                <tr key={staff.id}>
+                  <td>{staff.avatar_url ? <img className="mini-avatar" src={staff.avatar_url} alt="" /> : <span className="mini-avatar fallback">SR</span>}</td>
+                  <td>{staff.display_name ?? "Sin nombre"}</td>
+                  <td>{staff.steam_id}</td>
+                  <td>{staff.roles.join(", ")}</td>
+                  <td>{staff.active ? "Si" : "No"}</td>
+                  <td>{staff.permissions.length > 0 ? staff.permissions.join(", ") : "Sin permisos extra"}</td>
+                  <td><Link href={`/players/${encodeURIComponent(staff.steam_id)}`}>Ver</Link></td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6}>No hay cuentas con ese filtro.</td>
+                  <td colSpan={7}>No hay miembros internos con ese filtro.</td>
                 </tr>
               )}
             </tbody>

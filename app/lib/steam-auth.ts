@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { appConfig } from "./config";
 
 export const USER_SESSION_COOKIE = "srpg_user_session";
+export const STEAM_LOGIN_NEXT_COOKIE = "srpg_login_next";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
 const STEAM_OPENID_LOGIN_URL = "https://steamcommunity.com/openid/login";
 const STEAM_OPENID_ENDPOINTS = new Set([
@@ -169,6 +170,22 @@ export function getUserSessionCookieOptions() {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
   };
+}
+
+export function getSteamLoginNextCookieOptions() {
+  return {
+    httpOnly: true,
+    maxAge: 60 * 10,
+    path: "/",
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+  };
+}
+
+export function sanitizeLoginNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.includes("://")) return null;
+  return value;
 }
 
 function extractSteamId(claimedId: string) {

@@ -464,6 +464,43 @@ td[colspan] {
   color: var(--muted);
 }
 
+.identity-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.identity-row div {
+  display: grid;
+  gap: 2px;
+}
+
+.identity-row strong {
+  color: var(--text);
+}
+
+.identity-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mini-avatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  object-fit: cover;
+  border: 1px solid rgba(214, 166, 79, 0.45);
+  background: rgba(9, 11, 13, 0.78);
+}
+
+.mini-avatar.fallback {
+  display: inline-grid;
+  place-items: center;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 900;
+}
+
 .profile-header {
   display: flex;
   align-items: flex-start;

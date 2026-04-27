@@ -1,32 +1,31 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { appConfig } from "./config";
+import { getSteamUserSession, SteamUserSession } from "./steam-auth";
 
-export const ADMIN_SESSION_COOKIE = "srpg_admin_session";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+export const STAFF_ROLES = ["owner", "admin", "moderator", "support"] as const;
 
-export type AdminAccount = {
-  id: string;
-  steam_id: string | null;
-  username: string;
-  password_hash: string | null;
-  must_change_password: boolean;
-  active: boolean;
+const ROLE_PRIORITY: Record<StaffRole, number> = {
+  owner: 4,
+  admin: 3,
+  moderator: 2,
+  support: 1,
 };
+
+export type StaffRole = typeof STAFF_ROLES[number];
 
 export type AdminSession = {
-  adminId: string;
-  steamId: string | null;
-  username: string;
-  mustChangePassword: boolean;
-  iat: number;
-  exp: number;
+  steamId: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  role: StaffRole;
+  roles: StaffRole[];
+  permissions: string[];
 };
 
-export type PasswordValidation = {
-  ok: boolean;
-  errors: string[];
+type StaffRoleRow = {
+  id: string;
+  role: string;
+  active?: boolean | null;
 };
 
 export function getSupabaseAdminClient() {
@@ -44,85 +43,47 @@ export function getSupabaseAdminClient() {
   });
 }
 
-export function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `scrypt:${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, storedHash: string | null) {
-  if (!storedHash) return false;
-
-  const [method, salt, expectedHash] = storedHash.split(":");
-  if (method !== "scrypt" || !salt || !expectedHash) return false;
-
-  const actual = Buffer.from(scryptSync(password, salt, 64).toString("hex"), "hex");
-  const expected = Buffer.from(expectedHash, "hex");
-  if (actual.length !== expected.length) return false;
-
-  return timingSafeEqual(actual, expected);
-}
-
-export function validateAdminPassword(password: string): PasswordValidation {
-  const errors: string[] = [];
-
-  if (password.length < 12) errors.push("Debe tener minimo 12 caracteres.");
-  if (!/[a-z]/.test(password)) errors.push("Debe incluir una letra minuscula.");
-  if (!/[A-Z]/.test(password)) errors.push("Debe incluir una letra mayuscula.");
-  if (!/[0-9]/.test(password)) errors.push("Debe incluir un numero.");
-  if (!/[^A-Za-z0-9]/.test(password)) errors.push("Debe incluir un simbolo.");
-
-  return {
-    ok: errors.length === 0,
-    errors,
-  };
-}
-
-export function createAdminSessionToken(account: AdminAccount) {
-  const now = Math.floor(Date.now() / 1000);
-  const payload: AdminSession = {
-    adminId: account.id,
-    steamId: account.steam_id,
-    username: account.username,
-    mustChangePassword: account.must_change_password,
-    iat: now,
-    exp: now + SESSION_MAX_AGE_SECONDS,
-  };
-
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const signature = sign(body);
-  return `${body}.${signature}`;
-}
-
-export function getAdminSessionCookieOptions() {
-  return {
-    httpOnly: true,
-    maxAge: SESSION_MAX_AGE_SECONDS,
-    path: "/",
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-  };
-}
-
 export async function getAdminSession(): Promise<AdminSession | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
-  if (!token) return null;
-  return verifyAdminSessionToken(token);
+  const steamSession = await getSteamUserSession();
+  if (!steamSession) return null;
+  return getAdminSessionForSteamUser(steamSession);
 }
 
-export function verifyAdminSessionToken(token: string): AdminSession | null {
-  const [body, signature] = token.split(".");
-  if (!body || !signature || !safeCompare(signature, sign(body))) return null;
+export async function getAdminSessionForSteamUser(steamSession: SteamUserSession): Promise<AdminSession | null> {
+  const supabase = getSupabaseAdminClient();
+  let roles = await getActiveStaffRoles(supabase, steamSession.steamId);
 
-  try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as AdminSession;
-    if (!payload.adminId || !payload.username || !payload.exp) return null;
-    if (payload.exp < Math.floor(Date.now() / 1000)) return null;
-    return payload;
-  } catch {
-    return null;
+  if (roles.length === 0 && isEnvOwnerSteamId(steamSession.steamId)) {
+    await ensureEnvOwnerRole(supabase, steamSession);
+    roles = await getActiveStaffRoles(supabase, steamSession.steamId);
   }
+
+  if (roles.length === 0) return null;
+
+  const uniqueRoles = sortStaffRoles([...new Set(roles)]);
+  const { data: permissionRows } = await supabase
+    .from("admin_role_permissions")
+    .select("permission")
+    .in("role", uniqueRoles);
+
+  const permissions = new Set<string>();
+  for (const row of permissionRows ?? []) {
+    if (row.permission) permissions.add(String(row.permission));
+  }
+  if (uniqueRoles.includes("owner")) permissions.add("admin.full_access");
+
+  return {
+    steamId: steamSession.steamId,
+    displayName: steamSession.displayName,
+    avatarUrl: steamSession.avatarUrl,
+    role: uniqueRoles[0],
+    roles: uniqueRoles,
+    permissions: [...permissions].sort(),
+  };
+}
+
+export function adminHasPermission(session: AdminSession, permission: string) {
+  return session.permissions.includes("admin.full_access") || session.permissions.includes(permission);
 }
 
 export async function writeAdminAuditLog(input: {
@@ -150,19 +111,67 @@ export async function writeAdminAuditLog(input: {
       after_value: input.afterValue ?? null,
     });
   } catch {
-    // Audit failures must not block login or password changes.
+    // Audit failures must not block player login or admin access checks.
   }
 }
 
-function sign(body: string) {
-  const secret = process.env.SESSION_SECRET ?? "";
-  if (!secret) throw new Error("SESSION_SECRET is not configured");
-  return createHmac("sha256", secret).update(body).digest("base64url");
+async function getActiveStaffRoles(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  steamId: string,
+): Promise<StaffRole[]> {
+  const { data, error } = await supabase
+    .from("player_roles")
+    .select("id, role, active")
+    .eq("steam_id", steamId)
+    .eq("active", true)
+    .in("role", STAFF_ROLES);
+
+  if (error) return [];
+
+  return (data as StaffRoleRow[] | null ?? [])
+    .map((row) => row.role)
+    .filter(isStaffRole);
 }
 
-function safeCompare(a: string, b: string) {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  if (left.length !== right.length) return false;
-  return timingSafeEqual(left, right);
+async function ensureEnvOwnerRole(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  steamSession: SteamUserSession,
+) {
+  const now = new Date().toISOString();
+  await supabase
+    .from("players")
+    .upsert({
+      steam_id: steamSession.steamId,
+      display_name: steamSession.displayName,
+      avatar_url: steamSession.avatarUrl,
+      updated_at: now,
+    }, { onConflict: "steam_id" });
+
+  for (const role of ["owner", "admin"] as StaffRole[]) {
+    await supabase
+      .from("player_roles")
+      .upsert({
+        steam_id: steamSession.steamId,
+        role,
+        active: true,
+        notes: "bootstrap_from_ADMIN_STEAM_IDS",
+        updated_at: now,
+      }, { onConflict: "steam_id,role" });
+  }
+}
+
+function sortStaffRoles(roles: StaffRole[]) {
+  return roles.sort((a, b) => ROLE_PRIORITY[b] - ROLE_PRIORITY[a]);
+}
+
+function isStaffRole(role: string): role is StaffRole {
+  return STAFF_ROLES.includes(role as StaffRole);
+}
+
+function isEnvOwnerSteamId(steamId: string) {
+  const ids = (process.env.ADMIN_STEAM_IDS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return ids.includes(steamId);
 }

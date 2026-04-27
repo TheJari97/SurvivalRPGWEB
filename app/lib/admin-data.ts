@@ -50,15 +50,18 @@ export type AdminPlayerDetail = {
   auditLogs: Array<Record<string, unknown>>;
 };
 
-export type AdminAccountRow = {
+export type AdminStaffRow = {
   id: string;
-  steam_id: string | null;
-  username: string;
-  must_change_password: boolean;
+  steam_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  country: string | null;
+  role: string;
+  roles: string[];
   active: boolean;
-  password_changed_at: string | null;
+  permissions: string[];
   created_at: string;
-  reset_requests_count: number;
+  updated_at: string | null;
 };
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
@@ -171,40 +174,33 @@ export async function getAdminPlayerDetail(steamId: string): Promise<AdminPlayer
   };
 }
 
-export async function getAdminAccounts(query = ""): Promise<AdminAccountRow[]> {
+export async function getAdminStaffMembers(query = ""): Promise<AdminStaffRow[]> {
   const supabase = getSupabaseAdminClient();
   const search = query.trim().toLowerCase();
-  const [{ data: accounts }, { data: resets }] = await Promise.all([
-    supabase
-      .from("admin_accounts")
-      .select("id, steam_id, username, must_change_password, active, password_changed_at, created_at")
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("admin_password_reset_requests")
-      .select("admin_account_id, status"),
-  ]);
+  const { data } = await supabase
+    .from("admin_staff_profiles")
+    .select("id, steam_id, display_name, avatar_url, country, role, roles, active, permissions, created_at, updated_at")
+    .order("role_rank", { ascending: false })
+    .order("created_at", { ascending: true });
 
-  const resetCounts = new Map<string, number>();
-  for (const reset of resets ?? []) {
-    if (reset.status !== "requested") continue;
-    const accountId = String(reset.admin_account_id);
-    resetCounts.set(accountId, (resetCounts.get(accountId) ?? 0) + 1);
-  }
-
-  return (accounts ?? [])
-    .filter((account) => {
+  return (data ?? [])
+    .filter((staff) => {
       if (!search) return true;
-      return String(account.username).toLowerCase().includes(search)
-        || String(account.steam_id ?? "").toLowerCase().includes(search);
+      return String(staff.display_name ?? "").toLowerCase().includes(search)
+        || String(staff.steam_id).toLowerCase().includes(search)
+        || String(staff.role).toLowerCase().includes(search);
     })
-    .map((account) => ({
-      id: account.id,
-      steam_id: account.steam_id,
-      username: account.username,
-      must_change_password: account.must_change_password,
-      active: account.active,
-      password_changed_at: account.password_changed_at,
-      created_at: account.created_at,
-      reset_requests_count: resetCounts.get(account.id) ?? 0,
+    .map((staff) => ({
+      id: String(staff.id),
+      steam_id: String(staff.steam_id),
+      display_name: staff.display_name,
+      avatar_url: staff.avatar_url,
+      country: staff.country,
+      role: String(staff.role),
+      roles: Array.isArray(staff.roles) ? staff.roles.map(String) : [String(staff.role)],
+      active: Boolean(staff.active),
+      permissions: Array.isArray(staff.permissions) ? staff.permissions.map(String) : [],
+      created_at: staff.created_at,
+      updated_at: staff.updated_at,
     }));
 }

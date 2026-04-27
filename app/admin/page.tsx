@@ -7,7 +7,6 @@ import { getAdminDashboardData } from "../lib/admin-data";
 export default async function AdminPage() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
-  if (session.mustChangePassword) redirect("/admin/change-password");
   const dashboard = await getAdminDashboardData();
 
   return (
@@ -20,9 +19,15 @@ export default async function AdminPage() {
           pagos, sanciones y auditoria. Los cambios de balance quedaran como borrador hasta publicar.
         </p>
         <div className="admin-topline">
-          <span>Sesion: {session.username}</span>
+          <div className="identity-row">
+            {session.avatarUrl ? <img className="mini-avatar" src={session.avatarUrl} alt="" /> : <span className="mini-avatar fallback">SR</span>}
+            <div>
+              <strong>{session.displayName ?? `Steam ${session.steamId.slice(-4)}`}</strong>
+              <span>{session.role} / {session.steamId}</span>
+            </div>
+          </div>
           <form action="/api/admin/logout" method="post">
-            <button className="button secondary" type="submit">Salir</button>
+            <button className="button secondary" type="submit">Salir de Steam</button>
           </form>
         </div>
       </section>
@@ -119,7 +124,7 @@ function getSectionText(section: string) {
   const text: Record<string, string> = {
     Bienvenida: "Panel conectado a Supabase. Las metricas superiores vienen de datos reales.",
     Jugadores: "Lista y busqueda de jugadores por SteamID o nombre Steam.",
-    Cuentas: "Administradores, moderadores, soportes y solicitudes de reset de contrasena.",
+    Cuentas: "Administradores, moderadores y soportes ligados a SteamID.",
     Progreso: "Detalle de progreso por jugador y por heroe.",
     Sanciones: "Pendiente: bloqueo temporal/permanente y motivo auditable.",
     Balance: "Pendiente: editar borradores de balance y publicar versiones.",
@@ -128,7 +133,7 @@ function getSectionText(section: string) {
     Misiones: "Pendiente: administracion de misiones obligatorias/opcionales.",
     Temporadas: "Temporada activa conectada a season_001.",
     Pagos: "PayPal y MercadoPago quedan apagados hasta backend seguro.",
-    Auditoria: "Login, cambio de contrasena y guardados ya generan auditoria.",
+    Auditoria: "Login Steam, acceso admin y guardados generan auditoria.",
   };
   return text[section] ?? "Modulo en preparacion.";
 }
