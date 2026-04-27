@@ -324,7 +324,7 @@ h1 {
 
 .toolbar {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   flex-wrap: wrap;
   gap: 12px;
   padding: 14px;
@@ -471,8 +471,105 @@ td[colspan] {
   gap: 18px;
 }
 
+.profile-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.steam-avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  object-fit: cover;
+  border: 1px solid rgba(214, 166, 79, 0.55);
+  background: rgba(9, 11, 13, 0.78);
+}
+
+.steam-avatar.fallback {
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  font-weight: 900;
+}
+
 .detail-json {
   padding: 16px;
+}
+
+.timeline {
+  display: grid;
+  gap: 18px;
+}
+
+.timeline-card {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 22, 27, 0.9);
+}
+
+.timeline-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.timeline-head h2 {
+  margin-bottom: 8px;
+}
+
+.timeline-head p,
+.change-row p,
+.change-row small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.change-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.change-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.change-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.change-buff {
+  border-color: rgba(112, 183, 126, 0.5);
+  color: var(--green);
+}
+
+.change-nerf {
+  border-color: rgba(199, 84, 84, 0.5);
+  color: #f2b8b8;
+}
+
+.change-system,
+.change-adjust,
+.change-ajuste {
+  border-color: rgba(112, 168, 216, 0.5);
+  color: var(--blue);
 }
 
 pre {
@@ -561,5 +658,15 @@ pre {
 
   .nav {
     justify-content: flex-start;
+  }
+
+  .profile-header,
+  .profile-title-row,
+  .timeline-head {
+    flex-direction: column;
+  }
+
+  .change-row {
+    grid-template-columns: 1fr;
   }
 }

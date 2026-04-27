@@ -40,13 +40,19 @@ export default async function ProfilePage({
   return (
     <main className="page">
       <section className="section profile-header">
-        <div>
-          <p className="eyebrow">Perfil Steam</p>
-          <h1>{displayName}</h1>
-          <p className="lead">
-            Progreso real vinculado al SteamID {session.steamId}. Cada heroe mantiene su propio
-            nivel, oro, inventario, mascotas, misiones y desbloqueos.
-          </p>
+        <div className="profile-title-row">
+          {profile.player?.avatar_url ? <img className="steam-avatar" src={profile.player.avatar_url} alt="" /> : <span className="steam-avatar fallback">SR</span>}
+          <div>
+            <p className="eyebrow">Perfil Steam</p>
+            <h1>{displayName}</h1>
+            <p className="lead">
+              Progreso real vinculado al SteamID {session.steamId}. Cada heroe mantiene su propio
+              nivel, oro, inventario, mascotas, misiones y desbloqueos.
+            </p>
+            <div className="actions compact-actions">
+              <Link className="button secondary" href={`/players/${encodeURIComponent(session.steamId)}`}>Ver perfil publico</Link>
+            </div>
+          </div>
         </div>
         <form action="/api/auth/steam/logout" method="post">
           <button className="button secondary" type="submit">Salir</button>
