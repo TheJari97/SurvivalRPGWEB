@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getAdminSession } from "./lib/admin-auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,12 +12,15 @@ const navItems = [
   { href: "/", label: "Inicio" },
   { href: "/rankings", label: "Rankings" },
   { href: "/catalog", label: "Catalogo" },
+  { href: "/players", label: "Jugadores" },
   { href: "/changelog", label: "Changelog" },
   { href: "/shop", label: "Tienda" },
   { href: "/profile", label: "Perfil" },
 ];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const adminSession = await getAdminSession();
+
   return (
     <html lang="es">
       <body>
@@ -33,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {item.label}
                 </Link>
               ))}
+              {adminSession ? <Link className="admin-nav-link" href="/admin">Admin</Link> : null}
             </nav>
           </header>
           {children}

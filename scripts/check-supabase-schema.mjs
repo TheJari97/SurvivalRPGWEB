@@ -14,7 +14,7 @@ const checks = [
   ["player_roles", "steam_id,role,active"],
   ["admin_staff_profiles", "steam_id,display_name,avatar_url,role,roles,active,permissions"],
   ["admin_role_permissions", "role,permission"],
-  ["public_rankings", "display_name,hero_name,level,world_level,gear_score"],
+  ["public_rankings", "steam_id,display_name,hero_name,level,world_level,gear_score"],
   ["game_save_events", "steam_id,hero_name,status"],
   ["admin_dashboard_summary", "players_count,heroes_count,accepted_saves_count"],
   ["game_content_catalog", "content_type,content_key,status"],

@@ -28,7 +28,7 @@ export default async function PublicPlayerPage({
 
   return (
     <main className="page">
-      <section className="section profile-header">
+      <section className="section profile-header profile-hero">
         <div className="profile-title-row">
           {profile.player?.avatar_url ? <img className="steam-avatar" src={profile.player.avatar_url} alt="" /> : <span className="steam-avatar fallback">SR</span>}
           <div>
@@ -41,7 +41,12 @@ export default async function PublicPlayerPage({
         </div>
       </section>
 
-      <section className="section">
+      <nav className="subnav" aria-label="Subsecciones de perfil publico">
+        <a href="#resumen">Resumen</a>
+        <a href="#personajes">Personajes</a>
+      </nav>
+
+      <section className="section" id="resumen">
         <div className="stat-grid dashboard-stats">
           <div className="stat"><strong>{profile.heroes.length}</strong><span>Personajes</span></div>
           <div className="stat"><strong>{highest(profile.heroes.map((hero) => hero.level))}</strong><span>Nivel maximo</span></div>
@@ -50,8 +55,11 @@ export default async function PublicPlayerPage({
         </div>
       </section>
 
-      <section className="section">
-        <h2>Personajes</h2>
+      <section className="section" id="personajes">
+        <div className="catalog-toolbar-line">
+          <h2>Personajes</h2>
+          <span className="count-badge">{profile.heroes.length} publicos</span>
+        </div>
         <div className="table-card">
           <table>
             <thead>

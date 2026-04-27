@@ -7,6 +7,7 @@ export type AdminDashboardData = {
   auditLogsCount: number;
   publishedContentCount: number;
   latestSaveAt: string | null;
+  recentActivityCount: number;
   recentHeroes: Array<{
     steam_id: string;
     hero_name: string;
@@ -19,6 +20,7 @@ export type AdminDashboardData = {
     steam_id: string;
     hero_name: string;
     season_id: string;
+    status: string | null;
     addon_version: string | null;
     created_at: string;
   }>;
@@ -66,7 +68,8 @@ export type AdminStaffRow = {
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   const supabase = getSupabaseAdminClient();
-  const [{ data: summary }, { data: recentHeroes }, { data: recentSaves }] = await Promise.all([
+  const recentSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const [{ data: summary }, { data: recentHeroes }, { data: recentSaves }, { count: recentActivityCount }] = await Promise.all([
     supabase.from("admin_dashboard_summary").select("*").maybeSingle(),
     supabase
       .from("player_heroes")
@@ -75,9 +78,13 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       .limit(6),
     supabase
       .from("game_save_events")
-      .select("steam_id, hero_name, season_id, addon_version, created_at")
+      .select("steam_id, hero_name, season_id, status, addon_version, created_at")
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("audit_logs")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", recentSince),
   ]);
 
   return {
@@ -87,6 +94,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     auditLogsCount: Number(summary?.audit_logs_count ?? 0),
     publishedContentCount: Number(summary?.published_content_count ?? 0),
     latestSaveAt: summary?.latest_save_at ?? null,
+    recentActivityCount: recentActivityCount ?? 0,
     recentHeroes: recentHeroes ?? [],
     recentSaves: recentSaves ?? [],
   };

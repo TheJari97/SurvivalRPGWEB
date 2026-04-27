@@ -210,8 +210,10 @@ drop trigger if exists trg_player_heroes_audit on public.player_heroes;
 create trigger trg_player_heroes_audit after insert or update or delete on public.player_heroes
 for each row execute function public.audit_row_change();
 
-create or replace view public.public_rankings as
+drop view if exists public.public_rankings;
+create view public.public_rankings as
 select
+  ph.steam_id,
   ph.season_id,
   ph.hero_name,
   ph.level,

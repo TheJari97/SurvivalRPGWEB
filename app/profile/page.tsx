@@ -14,7 +14,7 @@ export default async function ProfilePage({
   if (!session) {
     return (
       <main className="page">
-        <section className="section">
+        <section className="section page-hero compact-hero profile-guest-hero">
           <p className="eyebrow">Login Steam requerido</p>
           <h1>Mi perfil</h1>
           <p className="lead">
@@ -39,7 +39,7 @@ export default async function ProfilePage({
 
   return (
     <main className="page">
-      <section className="section profile-header">
+      <section className="section profile-header profile-hero">
         <div className="profile-title-row">
           {profile.player?.avatar_url ? <img className="steam-avatar" src={profile.player.avatar_url} alt="" /> : <span className="steam-avatar fallback">SR</span>}
           <div>
@@ -59,7 +59,13 @@ export default async function ProfilePage({
         </form>
       </section>
 
-      <section className="section">
+      <nav className="subnav" aria-label="Subsecciones de perfil">
+        <a href="#resumen">Resumen</a>
+        <a href="#personajes">Personajes</a>
+        <a href="#cuenta">Cuenta</a>
+      </nav>
+
+      <section className="section" id="resumen">
         <div className="stat-grid dashboard-stats">
           <div className="stat">
             <strong>{profile.heroes.length}</strong>
@@ -80,8 +86,27 @@ export default async function ProfilePage({
         </div>
       </section>
 
-      <section className="section">
-        <h2>Personajes</h2>
+      <section className="section split-section" id="cuenta">
+        <article className="card profile-info-card">
+          <p className="eyebrow">Cuenta conectada</p>
+          <h3>Sesion Steam activa</h3>
+          <p>Nombre: {displayName}</p>
+          <p>SteamID: {session.steamId}</p>
+          <p>Actualizado: {profile.player?.updated_at ? new Date(profile.player.updated_at).toLocaleString("es") : "Pendiente de sincronizar"}</p>
+        </article>
+        <article className="card profile-info-card">
+          <p className="eyebrow">Reglas de progreso</p>
+          <h3>Progreso por heroe</h3>
+          <p>El oro, nivel, inventario, mascotas, misiones y desbloqueos no se comparten entre heroes.</p>
+          <p>Las skins y cosmeticos de cuenta si pueden usarse desde cualquier heroe cuando existan.</p>
+        </article>
+      </section>
+
+      <section className="section" id="personajes">
+        <div className="catalog-toolbar-line">
+          <h2>Personajes</h2>
+          <span className="count-badge">{profile.heroes.length} guardados</span>
+        </div>
         <div className="table-card">
           <table>
             <thead>

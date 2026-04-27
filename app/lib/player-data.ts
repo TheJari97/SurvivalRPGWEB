@@ -42,6 +42,17 @@ export type PublicPlayerProfileData = {
   cosmeticsCount: number;
 };
 
+export type PublicPlayerSearchRow = {
+  steam_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  country: string | null;
+  hero_count: number;
+  max_level: number;
+  max_world: number;
+  updated_at: string | null;
+};
+
 export type PlayerHeroDetail = {
   steam_id: string;
   season_id: string;
@@ -124,6 +135,42 @@ export async function getPublicPlayerProfileData(steamId: string): Promise<Publi
   };
 }
 
+export async function searchPublicPlayers(query = ""): Promise<PublicPlayerSearchRow[]> {
+  const search = query.trim().toLowerCase();
+  if (!search) return [];
+
+  const supabase = getSupabaseAdminClient();
+  const [{ data: players }, { data: heroes }] = await Promise.all([
+    supabase
+      .from("players")
+      .select("steam_id, display_name, avatar_url, country, updated_at")
+      .or(`steam_id.ilike.%${escapeLike(search)}%,display_name.ilike.%${escapeLike(search)}%`)
+      .limit(20),
+    supabase
+      .from("player_heroes")
+      .select("steam_id, level, world_level"),
+  ]);
+
+  const heroStats = new Map<string, { hero_count: number; max_level: number; max_world: number }>();
+  for (const hero of heroes ?? []) {
+    const steamId = String(hero.steam_id);
+    const previous = heroStats.get(steamId) ?? { hero_count: 0, max_level: 0, max_world: 0 };
+    previous.hero_count += 1;
+    previous.max_level = Math.max(previous.max_level, Number(hero.level ?? 0));
+    previous.max_world = Math.max(previous.max_world, Number(hero.world_level ?? 0));
+    heroStats.set(steamId, previous);
+  }
+
+  return (players ?? []).map((player) => ({
+    steam_id: player.steam_id,
+    display_name: player.display_name,
+    avatar_url: player.avatar_url,
+    country: player.country,
+    updated_at: player.updated_at,
+    ...(heroStats.get(player.steam_id) ?? { hero_count: 0, max_level: 0, max_world: 0 }),
+  }));
+}
+
 export async function getPlayerHeroDetail(steamId: string, heroName: string): Promise<PlayerHeroDetail> {
   const supabase = getSupabaseAdminClient();
   const { data } = await supabase
@@ -168,4 +215,8 @@ export function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {};
+}
+
+function escapeLike(value: string) {
+  return value.replace(/[%_]/g, (char) => `\\${char}`);
 }

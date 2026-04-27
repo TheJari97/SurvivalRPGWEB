@@ -11,7 +11,7 @@ export default async function AdminPage() {
 
   return (
     <main className="page">
-      <section className="section">
+      <section className="section page-hero compact-hero admin-hero">
         <p className="eyebrow">Acceso restringido</p>
         <h1>Panel administrador</h1>
         <p className="lead">
@@ -32,8 +32,18 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section className="section">
-        <h2>Estado real</h2>
+      <nav className="subnav admin-subnav" aria-label="Subsecciones administrador">
+        <a href="#estado">Estado</a>
+        <a href="#menus">Menus</a>
+        <a href="#personajes">Personajes</a>
+        <a href="#guardados">Guardados</a>
+      </nav>
+
+      <section className="section" id="estado">
+        <div className="catalog-toolbar-line">
+          <h2>Estado real</h2>
+          <span className="count-badge">Supabase conectado</span>
+        </div>
         <div className="stat-grid dashboard-stats">
           <div className="stat">
             <strong>{dashboard.playersCount}</strong>
@@ -55,10 +65,31 @@ export default async function AdminPage() {
             <strong>{dashboard.publishedContentCount}</strong>
             <span>Catalogo publicado</span>
           </div>
+          <div className="stat">
+            <strong>{dashboard.recentActivityCount}</strong>
+            <span>Eventos ultimas 24h</span>
+          </div>
         </div>
       </section>
 
-      <section className="section admin-layout">
+      <section className="section">
+        <div className="admin-chart-grid">
+          {dashboardBars(dashboard).map((metric) => (
+            <article className="chart-card" key={metric.label}>
+              <div className="chart-head">
+                <strong>{metric.label}</strong>
+                <span>{metric.value}</span>
+              </div>
+              <div className="bar-track">
+                <span style={{ width: `${metric.percent}%` }} />
+              </div>
+              <p>{metric.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section admin-layout" id="menus">
         <aside className="sidebar">
           <div><strong>Menus</strong></div>
           {adminSections.map((section) => {
@@ -83,8 +114,12 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section className="section">
-        <h2>Ultimos personajes</h2>
+      <section className="section split-section" id="personajes">
+        <div>
+          <div className="catalog-toolbar-line">
+            <h2>Ultimos personajes</h2>
+            <Link className="button secondary" href="/admin/players">Ver jugadores</Link>
+          </div>
         <div className="table-card">
           <table>
             <thead>
@@ -115,9 +150,53 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+        </div>
+        <div id="guardados">
+          <div className="catalog-toolbar-line">
+            <h2>Guardados recientes</h2>
+            <span className="count-badge">{dashboard.recentSaves.length} eventos</span>
+          </div>
+          <div className="timeline mini-timeline">
+            {dashboard.recentSaves.length > 0 ? dashboard.recentSaves.map((save) => (
+              <article className="timeline-card" key={`${save.steam_id}:${save.hero_name}:${save.created_at}`}>
+                <p className="eyebrow">{save.status ?? "guardado"}</p>
+                <h3>{save.hero_name}</h3>
+                <p>{save.steam_id}</p>
+                <p>{save.created_at ? new Date(save.created_at).toLocaleString("es") : "Sin fecha"}</p>
+              </article>
+            )) : (
+              <article className="card empty-state-card">
+                <p>Todavia no hay eventos de guardado.</p>
+              </article>
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );
+}
+
+function dashboardBars(dashboard: Awaited<ReturnType<typeof getAdminDashboardData>>) {
+  const max = Math.max(
+    dashboard.playersCount,
+    dashboard.heroesCount,
+    dashboard.acceptedSavesCount,
+    dashboard.auditLogsCount,
+    dashboard.publishedContentCount,
+    dashboard.recentActivityCount,
+    1,
+  );
+
+  return [
+    { label: "Jugadores", value: dashboard.playersCount, text: "Cuentas Steam registradas en BD." },
+    { label: "Personajes", value: dashboard.heroesCount, text: "Heroes con progreso independiente." },
+    { label: "Guardados", value: dashboard.acceptedSavesCount, text: "Eventos aceptados por la API." },
+    { label: "Auditoria", value: dashboard.auditLogsCount, text: "Registros internos y acciones sensibles." },
+    { label: "Actividad 24h", value: dashboard.recentActivityCount, text: "Eventos auditados recientes." },
+  ].map((metric) => ({
+    ...metric,
+    percent: Math.max(6, Math.round((metric.value / max) * 100)),
+  }));
 }
 
 function getSectionText(section: string) {
