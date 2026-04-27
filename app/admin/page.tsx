@@ -66,6 +66,10 @@ export default async function AdminPage() {
             <span>Catalogo publicado</span>
           </div>
           <div className="stat">
+            <strong>{dashboard.activePlayersCount}</strong>
+            <span>Conectados 60s</span>
+          </div>
+          <div className="stat">
             <strong>{dashboard.recentActivityCount}</strong>
             <span>Eventos ultimas 24h</span>
           </div>
@@ -183,6 +187,7 @@ function dashboardBars(dashboard: Awaited<ReturnType<typeof getAdminDashboardDat
     dashboard.acceptedSavesCount,
     dashboard.auditLogsCount,
     dashboard.publishedContentCount,
+    dashboard.activePlayersCount,
     dashboard.recentActivityCount,
     1,
   );
@@ -192,6 +197,7 @@ function dashboardBars(dashboard: Awaited<ReturnType<typeof getAdminDashboardDat
     { label: "Personajes", value: dashboard.heroesCount, text: "Heroes con progreso independiente." },
     { label: "Guardados", value: dashboard.acceptedSavesCount, text: "Eventos aceptados por la API." },
     { label: "Auditoria", value: dashboard.auditLogsCount, text: "Registros internos y acciones sensibles." },
+    { label: "Conectados", value: dashboard.activePlayersCount, text: "Jugadores con heartbeat en los ultimos 60 segundos." },
     { label: "Actividad 24h", value: dashboard.recentActivityCount, text: "Eventos auditados recientes." },
   ].map((metric) => ({
     ...metric,

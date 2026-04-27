@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { ActivityHeartbeat } from "./components/ActivityHeartbeat";
+import { LanguageSelector } from "./components/LanguageSelector";
 import { getAdminSession } from "./lib/admin-auth";
+import { getCurrentLanguage, getDictionary, translate } from "./lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,20 +13,26 @@ export const metadata: Metadata = {
 };
 
 const navItems = [
-  { href: "/", label: "Inicio" },
-  { href: "/rankings", label: "Rankings" },
-  { href: "/catalog", label: "Catalogo" },
-  { href: "/players", label: "Jugadores" },
-  { href: "/changelog", label: "Changelog" },
-  { href: "/shop", label: "Tienda" },
-  { href: "/profile", label: "Perfil" },
+  { href: "/", labelKey: "nav.home" },
+  { href: "/rankings", labelKey: "nav.rankings" },
+  { href: "/catalog", labelKey: "nav.catalog" },
+  { href: "/players", labelKey: "nav.players" },
+  { href: "/changelog", labelKey: "nav.changelog" },
+  { href: "/shop", labelKey: "nav.shop" },
+  { href: "/guide", labelKey: "nav.guide" },
+  { href: "/profile", labelKey: "nav.profile" },
 ];
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const adminSession = await getAdminSession();
+  const [adminSession, language] = await Promise.all([
+    getAdminSession(),
+    getCurrentLanguage(),
+  ]);
+  const dictionary = getDictionary(language);
+  const t = (key: string) => translate(dictionary, key);
 
   return (
-    <html lang="es">
+    <html lang={language}>
       <body>
         <div className="shell">
           <header className="topbar">
@@ -34,15 +44,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <nav className="nav" aria-label="Principal">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
-              {adminSession ? <Link className="admin-nav-link" href="/admin">Admin</Link> : null}
+              {adminSession ? <Link className="admin-nav-link" href="/admin">{t("nav.admin")}</Link> : null}
             </nav>
+            <Suspense fallback={null}>
+              <LanguageSelector currentLanguage={language} />
+            </Suspense>
           </header>
+          <Suspense fallback={null}>
+            <ActivityHeartbeat />
+          </Suspense>
           {children}
           <footer className="footer">
-            SurvivalRPG - custom game para Dota 2 con temporadas, rankings publicos, progreso por SteamID y panel administrador.
+            {t("footer.summary")}
           </footer>
         </div>
       </body>

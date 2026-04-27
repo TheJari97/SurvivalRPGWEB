@@ -55,7 +55,7 @@ export async function getPublishedContent(contentType?: string): Promise<Content
     let query = supabase
       .from("public_content_catalog")
       .select("content_type, content_key, name_es, summary_es, category, role, world_min, world_max, tier_min, tier_max, payload, version, updated_at")
-      .limit(100);
+      .limit(500);
 
     if (contentType) {
       query = query.eq("content_type", contentType);

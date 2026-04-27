@@ -2,12 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { appConfig } from "./config";
 import { getSteamUserSession, SteamUserSession } from "./steam-auth";
 
-export const STAFF_ROLES = ["owner", "admin", "moderator", "support"] as const;
+export const STAFF_ROLES = ["owner", "admin", "moderator", "developer", "support"] as const;
 
 const ROLE_PRIORITY: Record<StaffRole, number> = {
-  owner: 4,
-  admin: 3,
-  moderator: 2,
+  owner: 5,
+  admin: 4,
+  moderator: 3,
+  developer: 2,
   support: 1,
 };
 

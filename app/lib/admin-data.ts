@@ -6,6 +6,7 @@ export type AdminDashboardData = {
   acceptedSavesCount: number;
   auditLogsCount: number;
   publishedContentCount: number;
+  activePlayersCount: number;
   latestSaveAt: string | null;
   recentActivityCount: number;
   recentHeroes: Array<{
@@ -93,6 +94,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     acceptedSavesCount: Number(summary?.accepted_saves_count ?? 0),
     auditLogsCount: Number(summary?.audit_logs_count ?? 0),
     publishedContentCount: Number(summary?.published_content_count ?? 0),
+    activePlayersCount: Number(summary?.active_players_count ?? 0),
     latestSaveAt: summary?.latest_save_at ?? null,
     recentActivityCount: recentActivityCount ?? 0,
     recentHeroes: recentHeroes ?? [],

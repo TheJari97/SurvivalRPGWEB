@@ -21,7 +21,7 @@ export default async function AdminAccountsPage({
         <p className="eyebrow">Admin</p>
         <h1>Equipo interno</h1>
         <p className="lead">
-          Administradores, moderadores y soportes ligados a SteamID. El acceso ya no usa usuario ni contrasena.
+          Owner, administradores, moderadores, desarrolladores y soporte ligados a SteamID. El acceso ya no usa usuario ni contrasena.
         </p>
         <div className="actions">
           <Link className="button secondary" href="/admin">Panel</Link>
