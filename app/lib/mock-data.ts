@@ -54,6 +54,7 @@ export const heroRoles = [
 export const adminSections = [
   "Bienvenida",
   "Jugadores",
+  "Cuentas",
   "Progreso",
   "Sanciones",
   "Balance",

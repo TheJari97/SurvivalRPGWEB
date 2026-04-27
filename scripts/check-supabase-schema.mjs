@@ -18,6 +18,9 @@ const checks = [
   ["admin_dashboard_summary", "players_count,heroes_count,accepted_saves_count"],
   ["game_content_catalog", "content_type,content_key,status"],
   ["public_content_catalog", "content_type,content_key,name_es"],
+  ["game_balance_versions", "version_key,status"],
+  ["public_balance_change_log", "version_key,content_key,change_type"],
+  ["admin_password_reset_requests", "id,status"],
 ];
 
 let failed = false;

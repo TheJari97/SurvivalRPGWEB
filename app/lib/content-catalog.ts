@@ -17,6 +17,21 @@ export type ContentCatalogEntry = {
   updated_at: string | null;
 };
 
+export type BalanceChangeLogEntry = {
+  version_key: string;
+  version_title_es: string;
+  version_summary_es: string | null;
+  published_at: string | null;
+  content_type: string;
+  content_key: string;
+  change_type: string;
+  title_es: string;
+  detail_es: string;
+  before_value: Record<string, unknown> | null;
+  after_value: Record<string, unknown> | null;
+  created_at: string;
+};
+
 export async function getPublishedContent(contentType?: string): Promise<ContentCatalogEntry[]> {
   if (!appConfig.supabaseUrl || !appConfig.supabasePublishableKey) return [];
 
@@ -39,9 +54,33 @@ export async function getPublishedContent(contentType?: string): Promise<Content
   }
 }
 
+export async function getPublishedChangeLog(): Promise<BalanceChangeLogEntry[]> {
+  if (!appConfig.supabaseUrl || !appConfig.supabasePublishableKey) return [];
+
+  try {
+    const supabase = createClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey);
+    const { data, error } = await supabase
+      .from("public_balance_change_log")
+      .select("version_key, version_title_es, version_summary_es, published_at, content_type, content_key, change_type, title_es, detail_es, before_value, after_value, created_at")
+      .limit(50);
+
+    if (error || !data) return [];
+    return data as BalanceChangeLogEntry[];
+  } catch {
+    return [];
+  }
+}
+
 export function getEntryTags(entry: ContentCatalogEntry) {
   const tags = entry.payload.tags;
   return Array.isArray(tags)
     ? tags.filter((tag): tag is string => typeof tag === "string")
     : [];
+}
+
+export function getPayloadRecord(entry: ContentCatalogEntry, key: string) {
+  const value = entry.payload[key];
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
 }

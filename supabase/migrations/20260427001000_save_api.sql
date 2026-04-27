@@ -23,7 +23,8 @@ create policy "service role manages game save events" on public.game_save_events
 for all using (auth.role() = 'service_role')
 with check (auth.role() = 'service_role');
 
-create or replace view public.admin_dashboard_summary as
+drop view if exists public.admin_dashboard_summary;
+create view public.admin_dashboard_summary as
 select
   (select count(*) from public.players) as players_count,
   (select count(*) from public.player_heroes) as heroes_count,

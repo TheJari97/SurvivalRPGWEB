@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { adminSections } from "../lib/mock-data";
 import { getAdminSession } from "../lib/admin-auth";
 import { getAdminDashboardData } from "../lib/admin-data";
@@ -55,13 +56,23 @@ export default async function AdminPage() {
       <section className="section admin-layout">
         <aside className="sidebar">
           <div><strong>Menus</strong></div>
-          {adminSections.map((section) => <a href={`#${section.toLowerCase()}`} key={section}>{section}</a>)}
+          {adminSections.map((section) => {
+            const href = getSectionHref(section);
+            return href.startsWith("#")
+              ? <a href={href} key={section}>{section}</a>
+              : <Link href={href} key={section}>{section}</Link>;
+          })}
         </aside>
         <div className="grid">
           {adminSections.map((section) => (
             <article className="card" id={section.toLowerCase()} key={section}>
               <h3>{section}</h3>
               <p>{getSectionText(section)}</p>
+              {getSectionHref(section).startsWith("/") ? (
+                <div className="actions compact-actions">
+                  <Link className="button secondary" href={getSectionHref(section)}>Abrir</Link>
+                </div>
+              ) : null}
             </article>
           ))}
         </div>
@@ -107,8 +118,9 @@ export default async function AdminPage() {
 function getSectionText(section: string) {
   const text: Record<string, string> = {
     Bienvenida: "Panel conectado a Supabase. Las metricas superiores vienen de datos reales.",
-    Jugadores: "Lista y busqueda de jugadores por SteamID sera la siguiente expansion.",
-    Progreso: "Los guardados reales entran por /api/survivalrpg/player/save.",
+    Jugadores: "Lista y busqueda de jugadores por SteamID o nombre Steam.",
+    Cuentas: "Administradores, moderadores, soportes y solicitudes de reset de contrasena.",
+    Progreso: "Detalle de progreso por jugador y por heroe.",
     Sanciones: "Pendiente: bloqueo temporal/permanente y motivo auditable.",
     Balance: "Pendiente: editar borradores de balance y publicar versiones.",
     Enemigos: "Pendiente: administrar monster_configs y estadisticas.",
@@ -119,4 +131,14 @@ function getSectionText(section: string) {
     Auditoria: "Login, cambio de contrasena y guardados ya generan auditoria.",
   };
   return text[section] ?? "Modulo en preparacion.";
+}
+
+function getSectionHref(section: string) {
+  const routes: Record<string, string> = {
+    Jugadores: "/admin/players",
+    Cuentas: "/admin/accounts",
+    Progreso: "/admin/players",
+    Auditoria: "/admin/players",
+  };
+  return routes[section] ?? `#${section.toLowerCase()}`;
 }

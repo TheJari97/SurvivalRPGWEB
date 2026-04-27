@@ -1,6 +1,7 @@
 import { appConfig } from "../lib/config";
 import { getPlayerProfileData } from "../lib/player-data";
 import { getSteamUserSession } from "../lib/steam-auth";
+import Link from "next/link";
 
 export default async function ProfilePage({
   searchParams,
@@ -86,6 +87,7 @@ export default async function ProfilePage({
                 <th>Zona</th>
                 <th>Gear</th>
                 <th>Ultimo guardado</th>
+                <th>Detalle</th>
               </tr>
             </thead>
             <tbody>
@@ -98,10 +100,11 @@ export default async function ProfilePage({
                   <td>{hero.zone_unlocked}</td>
                   <td>{hero.gear_score}</td>
                   <td>{hero.last_save_at ? new Date(hero.last_save_at).toLocaleString("es") : "Sin guardar"}</td>
+                  <td><Link href={`/profile/${encodeURIComponent(hero.hero_name)}`}>Ver detalle</Link></td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7}>Todavia no hay personajes guardados para este SteamID.</td>
+                  <td colSpan={8}>Todavia no hay personajes guardados para este SteamID.</td>
                 </tr>
               )}
             </tbody>

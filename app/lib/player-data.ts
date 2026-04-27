@@ -22,6 +22,21 @@ export type PlayerProfileData = {
   cosmeticsCount: number;
 };
 
+export type PlayerHeroDetail = {
+  steam_id: string;
+  season_id: string;
+  hero_name: string;
+  level: number;
+  xp: number;
+  gold: number;
+  world_level: number;
+  zone_unlocked: number;
+  gear_score: number;
+  skill_points: number;
+  payload: Record<string, unknown>;
+  last_save_at: string | null;
+} | null;
+
 export async function getPlayerProfileData(steamId: string): Promise<PlayerProfileData> {
   const supabase = getSupabaseAdminClient();
   const [{ data: player }, { data: heroes }, { count: cosmeticsCount }] = await Promise.all([
@@ -47,4 +62,29 @@ export async function getPlayerProfileData(steamId: string): Promise<PlayerProfi
     heroes: heroes ?? [],
     cosmeticsCount: cosmeticsCount ?? 0,
   };
+}
+
+export async function getPlayerHeroDetail(steamId: string, heroName: string): Promise<PlayerHeroDetail> {
+  const supabase = getSupabaseAdminClient();
+  const { data } = await supabase
+    .from("player_heroes")
+    .select("steam_id, season_id, hero_name, level, xp, gold, world_level, zone_unlocked, gear_score, skill_points, payload, last_save_at")
+    .eq("steam_id", steamId)
+    .eq("hero_name", heroName)
+    .maybeSingle();
+
+  return data as PlayerHeroDetail;
+}
+
+export function getHeroPayloadSection(hero: PlayerHeroDetail, key: "inventory" | "artifacts" | "pets" | "quests") {
+  if (!hero?.payload || typeof hero.payload !== "object") return null;
+  const heroes = asRecord(hero.payload.heroes);
+  const heroPayload = asRecord(heroes[hero.hero_name]);
+  return heroPayload[key] ?? null;
+}
+
+export function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
 }
